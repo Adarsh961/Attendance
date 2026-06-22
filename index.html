@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75;
+    --green-light: #EAF3DE;
+    --green-border: #97C459;
+    --green-text: #3B6D11;
+    --red: #E24B4A;
+    --bg: #f5f5f3;
+    --card: #ffffff;
+    --border: #e0dfd8;
+    --text: #1a1a1a;
+    --text-muted: #6b6b68;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; }
+  .nav-logo { font-size: 15px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .nav-logo span { width: 28px; height: 28px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+  .nav-right { font-size: 12px; color: var(--text-muted); }
+
+  /* LAYOUT */
+  .container { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  /* HOME */
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+  /* BATCH GRID */
+  .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .batch-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.1rem 0.9rem; }
+  .batch-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .batch-name { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+  .sec-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sec-btn { padding: 5px 14px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text); cursor: pointer; transition: all 0.15s; }
+  .sec-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
+
+  /* QR PAGE */
+  .qr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .back-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); color: var(--text); cursor: pointer; }
+  .back-btn:hover { background: var(--bg); }
+  .qr-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: var(--green-light); color: var(--green-text); border: 1px solid var(--green-border); font-weight: 500; }
+
+  .qr-layout { display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start; }
+  @media(max-width: 600px) { .qr-layout { grid-template-columns: 1fr; } }
+
+  .qr-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
+  .qr-card canvas { border-radius: 8px; }
+  .timer-wrap { height: 5px; background: var(--bg); border-radius: 3px; margin-top: 12px; overflow: hidden; }
+  .timer-bar { height: 5px; background: var(--green); border-radius: 3px; transition: width 1s linear; }
+  .timer-txt { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .qr-hint { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+
+  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .form-heading { font-size: 14px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .locked-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #fef3cd; color: #856404; border: 1px solid #ffc107; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+  .field input { width: 100%; padding: 9px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+  .field input:focus { border-color: var(--green); background: #fff; }
+  .field input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg); }
+  .submit-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; margin-top: 2px; }
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .err-txt { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 16px; }
+  .saving-txt { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; }
+  .done-box { background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--green-text); margin-top: 12px; display: none; line-height: 1.5; }
+
+  /* LOG */
+  .log-section { margin-top: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .log-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .log-title { font-size: 13px; font-weight: 600; }
+  .log-count { font-size: 12px; color: var(--text-muted); }
+  .export-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); cursor: pointer; }
+  .export-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
+  .log-body { padding: 0 16px 12px; }
+  .log-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .log-table th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .log-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .log-table tr:last-child td { border-bottom: none; }
+  .empty-log { font-size: 12px; color: var(--text-muted); padding: 12px 0; }
+
+  /* SHEETS STATUS */
+  .sheets-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); margin-top: 10px; justify-content: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span>✓</span>
+    Attendance System
+  </div>
+  <div class="nav-right">Hana Global</div>
+</nav>
+
+<div class="container">
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="homePage">
+    <div class="page-title">Take Attendance</div>
+    <div class="page-sub">Select a batch and section to display the QR code on the projector.</div>
+    <div class="batch-grid" id="batchGrid"></div>
+  </div>
+
+  <!-- QR PAGE -->
+  <div class="page" id="qrPage">
+    <div class="qr-header">
+      <button class="back-btn" onclick="goHome()">&#8592; Back</button>
+      <div>
+        <div style="font-size:16px;font-weight:600;" id="pageTitle"></div>
+        <div style="font-size:12px;color:var(--text-muted);" id="pageDate"></div>
+      </div>
+      <span class="qr-badge" id="qrBadge"></span>
+    </div>
+
+    <div class="qr-layout">
+      <div class="qr-card">
+        <canvas id="qrCanvas" width="180" height="180"></canvas>
+        <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+        <div class="timer-txt" id="timerTxt">Refreshing in 15s</div>
+        <div class="qr-hint">QR rotates every 15 seconds.<br>Screenshots won't work.</div>
+        <div class="sheets-row"><span class="dot"></span> Saving to Google Sheets</div>
+      </div>
+
+      <div>
+        <div class="form-card">
+          <div class="form-heading">
+            Mark your attendance
+            <span class="locked-pill" id="lockBadge" style="display:none">🔒 Locked</span>
+          </div>
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="stuName" placeholder="Enter your full name">
+          </div>
+          <div class="field">
+            <label>Phone number</label>
+            <input type="tel" id="stuPhone" placeholder="10-digit number" maxlength="10">
+          </div>
+          <button class="submit-btn" id="submitBtn" onclick="submitAttendance()">Mark Attendance</button>
+          <div class="err-txt" id="errTxt"></div>
+          <div class="saving-txt" id="savingTxt"></div>
+          <div class="done-box" id="doneBox"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-section">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Attendance Log</div>
+          <div class="log-count"><span id="logCount">0</span> students marked present</div>
+        </div>
+        <button class="export-btn" onclick="exportCSV()">&#8595; Export CSV</button>
+      </div>
+      <div class="log-body">
+        <div id="logBody"><div class="empty-log">No attendance recorded yet.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/a/macros/hanaglobal-japan.com/s/AKfycbw-pWJWK0oX7Vu9Phc0LTiBT737Y6NW5Ox6Rww_WHX09CHBgnToiGBpD0m3Jc0bBec4Ww/exec';
+const BATCHES = ['Batch 1','Batch 2','Batch 3','Batch 4'];
+const SECTIONS = ['N4','N5'];
+const QR_SEC = 15;
+
+let curBatch = '', curSection = '';
+let timerSec = QR_SEC, timerInt = null;
+let attendance = {};
+let deviceSubmitted = {};
+
+function getKey() { return curBatch + '||' + curSection; }
+
+function fmtDate() {
+  return new Date().toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+}
+
+function getDeviceId() {
+  let id = sessionStorage.getItem('att_dev_id');
+  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2) + Date.now(); sessionStorage.setItem('att_dev_id', id); }
+  return id;
+}
+
+function buildHome() {
+  const g = document.getElementById('batchGrid');
+  g.innerHTML = '';
+  BATCHES.forEach(b => {
+    const c = document.createElement('div');
+    c.className = 'batch-card';
+    c.innerHTML = `<div class="batch-label">Batch</div><div class="batch-name">${b}</div><div class="sec-btns">${SECTIONS.map(s => `<button class="sec-btn" onclick="openQR('${b}','${s}')">${s}</button>`).join('')}</div>`;
+    g.appendChild(c);
+  });
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function openQR(batch, section) {
+  curBatch = batch; curSection = section;
+  const k = getKey();
+  if (!attendance[k]) attendance[k] = [];
+  document.getElementById('pageTitle').textContent = batch + ' · Section ' + section;
+  document.getElementById('pageDate').textContent = fmtDate();
+  document.getElementById('qrBadge').textContent = batch + ' ' + section;
+  showPage('qrPage');
+  resetForm();
+  checkDeviceLock();
+  startCycle();
+  renderLog();
+}
+
+function goHome() {
+  clearInterval(timerInt);
+  resetForm();
+  showPage('homePage');
+}
+
+function resetForm() {
+  document.getElementById('stuName').value = '';
+  document.getElementById('stuPhone').value = '';
+  document.getElementById('errTxt').textContent = '';
+  document.getElementById('savingTxt').textContent = '';
+  document.getElementById('doneBox').style.display = 'none';
+}
+
+function checkDeviceLock() {
+  const k = getKey();
+  const locked = deviceSubmitted[k] && deviceSubmitted[k][getDeviceId()];
+  setFormLocked(locked);
+  if (locked) {
+    document.getElementById('doneBox').style.display = 'block';
+    document.getElementById('doneBox').textContent = '✓ You have already marked attendance for this session. This device is locked.';
+  }
+}
+
+function setFormLocked(locked) {
+  document.getElementById('stuName').disabled = locked;
+  document.getElementById('stuPhone').disabled = locked;
+  document.getElementById('submitBtn').disabled = locked;
+  document.getElementById('lockBadge').style.display = locked ? 'inline-flex' : 'none';
+}
+
+function newSessionId() {
+  return curBatch + '_' + curSection + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+}
+
+function startCycle() {
+  clearInterval(timerInt);
+  timerSec = QR_SEC;
+  refreshQR();
+  timerInt = setInterval(() => {
+    timerSec--;
+    updateTimer();
+    if (timerSec <= 0) { timerSec = QR_SEC; refreshQR(); }
+  }, 1000);
+}
+
+function refreshQR() {
+  const id = newSessionId();
+  const canvas = document.getElementById('qrCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 180, 180);
+  try { QRCode.toCanvas(canvas, id, {width:180, margin:1, color:{dark:'#1a1a1a', light:'#ffffff'}}); } catch(e) {}
+  updateTimer();
+}
+
+function updateTimer() {
+  document.getElementById('timerBar').style.width = ((timerSec / QR_SEC) * 100) + '%';
+  document.getElementById('timerTxt').textContent = 'Refreshing in ' + timerSec + 's';
+}
+
+async function submitAttendance() {
+  const name = document.getElementById('stuName').value.trim();
+  const phone = document.getElementById('stuPhone').value.trim();
+  const err = document.getElementById('errTxt');
+  const saving = document.getElementById('savingTxt');
+  err.textContent = ''; saving.textContent = '';
+
+  if (!name) { err.textContent = 'Please enter your full name.'; return; }
+  if (!/^\d{10}$/.test(phone)) { err.textContent = 'Enter a valid 10-digit phone number.'; return; }
+
+  const k = getKey();
+  const recs = attendance[k];
+
+  if (recs.find(r => r.phone === phone)) {
+    err.textContent = 'This phone number already has attendance marked.';
+    lockDevice(k, name);
+    return;
+  }
+
+  const now = new Date();
+  const record = {
+    name, phone,
+    date: now.toLocaleDateString('en-IN'),
+    time: now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'}),
+    batch: curBatch,
+    section: curSection
+  };
+
+  recs.push(record);
+  lockDevice(k, name);
+  renderLog();
+
+  saving.textContent = 'Saving to Google Sheets...';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(record)
+    });
+    saving.textContent = '✓ Saved to Google Sheets';
+    setTimeout(() => { saving.textContent = ''; }, 3000);
+  } catch(e) {
+    saving.textContent = '⚠ Could not reach Sheets — record kept locally.';
+  }
+}
+
+function lockDevice(k, name) {
+  if (!deviceSubmitted[k]) deviceSubmitted[k] = {};
+  deviceSubmitted[k][getDeviceId()] = true;
+  setFormLocked(true);
+  document.getElementById('errTxt').textContent = '';
+  document.getElementById('doneBox').style.display = 'block';
+  document.getElementById('doneBox').textContent = '✓ Attendance marked for ' + name + '. This form is now locked for your device.';
+}
+
+function renderLog() {
+  const recs = attendance[getKey()] || [];
+  document.getElementById('logCount').textContent = recs.length;
+  const body = document.getElementById('logBody');
+  if (!recs.length) { body.innerHTML = '<div class="empty-log">No attendance recorded yet.</div>'; return; }
+  body.innerHTML = `<table class="log-table"><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Date</th><th>Time</th></tr></thead><tbody>${recs.map((r,i) => `<tr><td>${i+1}</td><td>${r.name}</td><td>${r.phone}</td><td>${r.date}</td><td>${r.time}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function exportCSV() {
+  const recs = attendance[getKey()] || [];
+  if (!recs.length) { alert('No records to export.'); return; }
+  const rows = [['#','Name','Phone','Date','Time','Batch','Section'], ...recs.map((r,i) => [i+1,r.name,r.phone,r.date,r.time,r.batch,r.section])];
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = curBatch + '_' + curSection + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+buildHome();
+</script>
+</body>
+</html>
