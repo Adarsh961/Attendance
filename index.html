@@ -3,169 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Attendance System</title>
+<title>Admin Panel — Teacher Attendance</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --green: #1D9E75;
-    --green-light: #EAF3DE;
-    --green-border: #97C459;
-    --green-text: #3B6D11;
-    --red: #E24B4A;
-    --red-light: #FEE2E2;
-    --orange: #F59E0B;
-    --orange-light: #FEF3C7;
-    --bg: #f5f5f3;
-    --card: #ffffff;
-    --border: #e0dfd8;
-    --text: #1a1a1a;
-    --text-muted: #6b6b68;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#1D9E75;--green-light:#EAF3DE;--green-border:#97C459;--green-text:#3B6D11;
+  --red:#E24B4A;--red-light:#FEE2E2;--orange:#F59E0B;--orange-light:#FEF3C7;
+  --bg:#f5f5f3;--card:#ffffff;--border:#e0dfd8;--text:#1a1a1a;--text-muted:#6b6b68;
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10;}
+.nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.nav-logo span{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.nav-tag{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--orange-light);color:#92400E;border:1px solid var(--orange);font-weight:500;}
+.container{max-width:900px;margin:0 auto;padding:1.5rem 1rem;}
+.page{display:none;}.page.active{display:block;}
+.page-title{font-size:20px;font-weight:600;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:14px;font-weight:600;}
+.card-body{padding:16px;}
+.loc-status{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);margin-bottom:12px;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot.green{background:var(--green);}.dot.orange{background:var(--orange);}.dot.red{background:var(--red);}
+.btn{width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:opacity 0.15s;}
+.btn-green{background:var(--green);color:#fff;}.btn-green:hover{opacity:0.9;}.btn-green:disabled{opacity:0.4;cursor:not-allowed;}
+.hint{font-size:11px;color:var(--text-muted);margin-top:8px;}
 
-  /* NAV */
-  nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; }
-  .nav-logo { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-  .nav-logo span { width: 28px; height: 28px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
-  .nav-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--orange-light); color: #92400E; border: 1px solid var(--orange); font-weight: 500; }
+/* QR PAGE */
+.qr-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;}
+.back-btn{padding:7px 14px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);cursor:pointer;}
+.back-btn:hover{background:var(--bg);}
+.qr-layout{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:start;}
+@media(max-width:600px){.qr-layout{grid-template-columns:1fr;}}
+.qr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;}
+.qr-card canvas{border-radius:8px;}
+.timer-wrap{height:5px;background:var(--bg);border-radius:3px;margin-top:12px;overflow:hidden;}
+.timer-bar{height:5px;background:var(--green);border-radius:3px;transition:width 1s linear;}
+.timer-txt{font-size:12px;color:var(--text-muted);margin-top:6px;}
+.qr-hint{font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.6;}
+.scan-url{font-size:10px;font-family:monospace;padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-top:8px;word-break:break-all;color:var(--text-muted);}
 
-  .container { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem; }
-
-  /* PAGES */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* ── ADMIN PAGE ── */
-  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-  .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
-
-  .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
-  .admin-card-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .admin-card-title { font-size: 14px; font-weight: 600; }
-  .admin-card-body { padding: 16px; }
-
-  .location-status { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); margin-bottom: 12px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot.green { background: var(--green); }
-  .dot.orange { background: var(--orange); }
-  .dot.red { background: var(--red); }
-
-  .set-location-btn { width: 100%; padding: 9px; font-size: 13px; font-weight: 500; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; }
-  .set-location-btn:hover { opacity: 0.9; }
-  .set-location-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .start-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; margin-top: 4px; }
-  .start-btn:hover { opacity: 0.9; }
-  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* ── QR PAGE ── */
-  .qr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
-  .back-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); color: var(--text); cursor: pointer; }
-  .back-btn:hover { background: var(--bg); }
-
-  .qr-layout { display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start; }
-  @media(max-width: 580px) { .qr-layout { grid-template-columns: 1fr; } }
-
-  .qr-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
-  .qr-card canvas { border-radius: 8px; }
-  .timer-wrap { height: 5px; background: var(--bg); border-radius: 3px; margin-top: 12px; overflow: hidden; }
-  .timer-bar { height: 5px; background: var(--green); border-radius: 3px; transition: width 1s linear; }
-  .timer-txt { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-  .qr-hint { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
-  .token-badge { display: inline-block; font-size: 10px; font-family: monospace; padding: 2px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; margin-top: 8px; color: var(--text-muted); word-break: break-all; }
-
-  /* ── FORM CARD ── */
-  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-  .form-heading { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .form-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 1rem; }
-  .locked-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #FEF3C7; color: #92400E; border: 1px solid var(--orange); }
-
-  .teacher-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  @media(max-width: 400px) { .teacher-list { grid-template-columns: 1fr; } }
-  .teacher-btn { padding: 9px 12px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.15s; }
-  .teacher-btn:hover:not(:disabled) { border-color: var(--green); background: var(--green-light); color: var(--green-text); }
-  .teacher-btn.selected { border-color: var(--green); background: var(--green-light); color: var(--green-text); font-weight: 600; }
-  .teacher-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .geo-status { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); margin-bottom: 12px; }
-
-  .submit-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; }
-  .submit-btn:hover { opacity: 0.9; }
-  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .err-txt { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 16px; text-align: center; }
-  .saving-txt { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; }
-  .done-box { background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--green-text); margin-top: 12px; display: none; line-height: 1.6; }
-  .blocked-box { background: var(--red-light); border: 1px solid #FCA5A5; border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: #991B1B; margin-top: 12px; display: none; line-height: 1.6; }
-
-  /* ── LOG ── */
-  .log-section { margin-top: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-  .log-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-  .log-title { font-size: 13px; font-weight: 600; }
-  .log-count { font-size: 12px; color: var(--text-muted); }
-  .export-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); cursor: pointer; }
-  .export-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
-  .log-body { padding: 0 16px 12px; }
-  .log-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-  .log-table th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--border); }
-  .log-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
-  .log-table tr:last-child td { border-bottom: none; }
-  .empty-log { font-size: 12px; color: var(--text-muted); padding: 12px 0; }
-  .present-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--green-light); color: var(--green-text); border: 1px solid var(--green-border); }
-
-  /* ABSENT LIST */
-  .absent-section { margin-top: 1rem; padding: 12px 16px; border-top: 1px solid var(--border); }
-  .absent-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
-  .absent-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .absent-chip { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--red-light); color: #991B1B; border: 1px solid #FCA5A5; }
+/* LOG */
+.log-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.log-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);}
+.log-title{font-size:13px;font-weight:600;}
+.log-count{font-size:12px;color:var(--text-muted);}
+.export-btn{padding:5px 12px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);cursor:pointer;}
+.export-btn:hover{background:var(--green);color:#fff;border-color:var(--green);}
+.log-body{padding:0 16px 12px;}
+.log-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.log-table th{text-align:left;color:var(--text-muted);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--border);}
+.log-table td{padding:7px 8px;border-bottom:1px solid var(--border);}
+.log-table tr:last-child td{border-bottom:none;}
+.empty-log{font-size:12px;color:var(--text-muted);padding:12px 0;}
+.present-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);}
+.absent-section{padding:12px 16px;border-top:1px solid var(--border);}
+.absent-title{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+.absent-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.absent-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--red-light);color:#991B1B;border:1px solid #FCA5A5;}
+.refresh-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);text-align:center;}
 </style>
 </head>
 <body>
-
 <nav>
-  <div class="nav-logo">
-    <span>✓</span>
-    Teacher Attendance
-  </div>
+  <div class="nav-logo"><span>✓</span>Teacher Attendance</div>
   <span class="nav-tag">Admin Panel</span>
 </nav>
-
 <div class="container">
 
-  <!-- ADMIN PAGE -->
-  <div class="page active" id="adminPage">
-    <div class="page-title">Teacher Attendance</div>
-    <div class="page-sub">Set the office location, then start the session to generate the QR code.</div>
+  <!-- SETUP PAGE -->
+  <div class="page active" id="setupPage">
+    <div class="page-title">Setup Attendance Session</div>
+    <div class="page-sub">Capture your office location first, then start the session to generate the QR code for teachers to scan.</div>
 
-    <!-- Location Setup -->
-    <div class="admin-card">
-      <div class="admin-card-header">
-        <div class="admin-card-title">📍 Office Location</div>
-        <span id="locSavedBadge" style="display:none;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);">✓ Set</span>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📍 Step 1 — Set Office Location</div>
+        <span id="locBadge" style="display:none;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);">✓ Set</span>
       </div>
-      <div class="admin-card-body">
-        <div class="location-status" id="locStatus">
+      <div class="card-body">
+        <div class="loc-status" id="locStatus">
           <span class="dot orange"></span>
-          <span id="locStatusTxt">Location not set yet</span>
+          <span id="locTxt">Location not captured yet</span>
         </div>
-        <button class="set-location-btn" id="setLocBtn" onclick="setOfficeLocation()">
-          📡 Capture Current Location as Office
-        </button>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Click this once while you're at the office. Teachers must be within 100m to mark attendance.</div>
+        <button class="btn btn-green" id="locBtn" onclick="captureLocation()">📡 Capture Current Location as Office</button>
+        <div class="hint">Do this once while you are physically at the office. Teachers must be within 100m to mark attendance.</div>
       </div>
     </div>
 
-    <!-- Start Session -->
-    <div class="admin-card">
-      <div class="admin-card-header">
-        <div class="admin-card-title">🎯 Start Attendance Session</div>
-      </div>
-      <div class="admin-card-body">
-        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Once started, a QR code will be displayed. The QR rotates every 15 seconds with a new token — only valid scans from within 100m will be accepted.</div>
-        <button class="start-btn" id="startBtn" onclick="startSession()" disabled>Start Session →</button>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;" id="startHint">Set office location first to enable this.</div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">🎯 Step 2 — Start Session</div></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">The QR code will rotate every 15 seconds. Teachers scan it with their phone — it opens a check-in form on their device.</div>
+        <button class="btn btn-green" id="startBtn" onclick="startSession()" disabled>Start Session →</button>
+        <div class="hint" id="startHint">Set office location first to enable this.</div>
       </div>
     </div>
   </div>
@@ -173,161 +108,99 @@
   <!-- QR PAGE -->
   <div class="page" id="qrPage">
     <div class="qr-header">
-      <button class="back-btn" onclick="goAdmin()">← Back</button>
+      <button class="back-btn" onclick="goSetup()">← Back</button>
       <div>
-        <div style="font-size:16px;font-weight:600;">Teacher Check-In</div>
-        <div style="font-size:12px;color:var(--text-muted);" id="qrPageDate"></div>
+        <div style="font-size:16px;font-weight:600;">Live QR — Teacher Check-In</div>
+        <div style="font-size:12px;color:var(--text-muted);" id="qrDate"></div>
       </div>
     </div>
 
     <div class="qr-layout">
       <div class="qr-card">
-        <canvas id="qrCanvas" width="180" height="180"></canvas>
+        <div id="qrCanvas"></div>
         <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
         <div class="timer-txt" id="timerTxt">Refreshing in 15s</div>
-        <div class="qr-hint">
-          QR rotates every 15 seconds.<br>
-          Screenshots won't work.<br>
-          Must be within 100m of office.
-        </div>
-        <div class="token-badge" id="tokenBadge"></div>
+        <div class="qr-hint">Show this QR on the projector.<br>Teachers scan with their phone camera.<br>Rotates every 15 seconds.</div>
+        <div class="scan-url" id="scanUrl"></div>
       </div>
 
-      <div>
-        <div class="form-card">
-          <div class="form-heading">
-            Select your name
-            <span class="locked-pill" id="lockBadge" style="display:none">🔒 Locked</span>
+      <div class="log-section">
+        <div class="log-header">
+          <div>
+            <div class="log-title">Today's Attendance</div>
+            <div class="log-count"><span id="logCount">0</span> / 8 present</div>
           </div>
-          <div class="form-sub">Choose your name from the list below to mark attendance.</div>
-
-          <div class="geo-status" id="geoStatus">
-            <span class="dot orange" id="geoDot"></span>
-            <span id="geoTxt">Checking your location...</span>
-          </div>
-
-          <div class="teacher-list" id="teacherList"></div>
-
-          <button class="submit-btn" id="submitBtn" onclick="submitAttendance()" disabled>Mark Attendance</button>
-          <div class="err-txt" id="errTxt"></div>
-          <div class="saving-txt" id="savingTxt"></div>
-          <div class="done-box" id="doneBox"></div>
-          <div class="blocked-box" id="blockedBox"></div>
+          <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
         </div>
-      </div>
-    </div>
-
-    <div class="log-section">
-      <div class="log-header">
-        <div>
-          <div class="log-title">Today's Attendance</div>
-          <div class="log-count"><span id="logCount">0</span> / 8 teachers present</div>
+        <div class="log-body">
+          <div id="logBody"><div class="empty-log">Waiting for teachers to check in...</div></div>
         </div>
-        <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
-      </div>
-      <div class="log-body">
-        <div id="logBody"><div class="empty-log">No attendance recorded yet.</div></div>
-      </div>
-      <div class="absent-section">
-        <div class="absent-title">Not yet marked:</div>
-        <div class="absent-chips" id="absentChips"></div>
+        <div class="absent-section">
+          <div class="absent-title">Not yet marked:</div>
+          <div class="absent-chips" id="absentChips"></div>
+        </div>
+        <div class="refresh-note">Log updates automatically every 10 seconds as teachers check in.</div>
       </div>
     </div>
   </div>
 
 </div>
-
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_dzT6sFIHkFQumTulslJmG7f7e2rvdrEsPqi5W5FwSEQtSmllw01G_-8xqHrr20yiNQ/exec';
 const TEACHERS = ['Pranita','Laveena','Rishu Kumar','Ankit','Sai Adarsh','Mayu','Shruthi Lakshmi','Christene'];
+const CHECKIN_URL = 'https://adarsh961.github.io/Attendance/checkin.html';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_dzT6sFIHkFQumTulslJmG7f7e2rvdrEsPqi5W5FwSEQtSmllw01G_-8xqHrr20yiNQ/exec';
 const QR_SEC = 15;
-const GEO_RADIUS = 100; // meters
 
 let officeLocation = null;
 let currentToken = '';
 let tokenExpiry = 0;
-let timerSec = QR_SEC, timerInt = null;
+let timerSec = QR_SEC;
+let timerInt = null;
+let pollInt = null;
 let attendance = [];
-let deviceSubmitted = false;
-let selectedTeacher = '';
-let teacherLocation = null;
+let qrInstance = null;
 
-// ── UTILS ──
-function getDeviceId() {
-  let id = sessionStorage.getItem('teacher_dev_id');
-  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2) + Date.now(); sessionStorage.setItem('teacher_dev_id', id); }
-  return id;
+function captureLocation() {
+  const btn = document.getElementById('locBtn');
+  btn.disabled = true; btn.textContent = '📡 Getting GPS...';
+  navigator.geolocation.getCurrentPosition(pos => {
+    officeLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy) };
+    // Store in sessionStorage so checkin page can't access it (security)
+    sessionStorage.setItem('office_lat', officeLocation.lat);
+    sessionStorage.setItem('office_lng', officeLocation.lng);
+    document.getElementById('locStatus').innerHTML = `<span class="dot green"></span><span>Office set at ${officeLocation.lat.toFixed(5)}, ${officeLocation.lng.toFixed(5)} (±${officeLocation.acc}m accuracy)</span>`;
+    document.getElementById('locBadge').style.display = 'inline-block';
+    btn.textContent = '✓ Location Set — Click to Recapture';
+    btn.disabled = false;
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('startHint').textContent = 'Ready! Click to start the attendance session.';
+  }, err => {
+    document.getElementById('locTxt').textContent = 'Could not get location. Please allow GPS access.';
+    btn.disabled = false; btn.textContent = '📡 Try Again';
+  }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
-function fmtDate() {
-  return new Date().toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+function startSession() {
+  document.getElementById('setupPage').classList.remove('active');
+  document.getElementById('qrPage').classList.add('active');
+  document.getElementById('qrDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  attendance = [];
+  renderLog();
+  startQRCycle();
+  startPolling();
 }
 
-function fmtTime() {
-  return new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+function goSetup() {
+  clearInterval(timerInt);
+  clearInterval(pollInt);
+  document.getElementById('qrPage').classList.remove('active');
+  document.getElementById('setupPage').classList.add('active');
 }
 
 function generateToken() {
-  return 'TCH_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8).toUpperCase();
+  return Math.random().toString(36).slice(2,10).toUpperCase() + Date.now().toString(36).toUpperCase();
 }
 
-// ── DISTANCE CALCULATION (Haversine formula) ──
-function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-// ── ADMIN: SET OFFICE LOCATION ──
-function setOfficeLocation() {
-  const btn = document.getElementById('setLocBtn');
-  btn.disabled = true;
-  btn.textContent = '📡 Getting location...';
-  document.getElementById('locStatusTxt').textContent = 'Requesting GPS...';
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      officeLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
-      document.getElementById('locStatus').innerHTML = `<span class="dot green"></span><span>Office set: ${officeLocation.lat.toFixed(5)}, ${officeLocation.lng.toFixed(5)} (±${Math.round(officeLocation.accuracy)}m)</span>`;
-      document.getElementById('locSavedBadge').style.display = 'inline-block';
-      btn.textContent = '✓ Location Captured — Click to Update';
-      btn.disabled = false;
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('startHint').textContent = 'Location set! You can now start the session.';
-    },
-    err => {
-      document.getElementById('locStatusTxt').textContent = 'Could not get location. Please allow location access.';
-      btn.disabled = false;
-      btn.textContent = '📡 Try Again';
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
-
-// ── START SESSION ──
-function startSession() {
-  document.getElementById('adminPage').classList.remove('active');
-  document.getElementById('qrPage').classList.add('active');
-  document.getElementById('qrPageDate').textContent = fmtDate();
-  deviceSubmitted = false;
-  selectedTeacher = '';
-  buildTeacherList();
-  checkTeacherGeo();
-  startQRCycle();
-  renderLog();
-}
-
-function goAdmin() {
-  clearInterval(timerInt);
-  document.getElementById('qrPage').classList.remove('active');
-  document.getElementById('adminPage').classList.add('active');
-}
-
-// ── QR CYCLE WITH TOKEN ──
 function startQRCycle() {
   clearInterval(timerInt);
   timerSec = QR_SEC;
@@ -342,19 +215,22 @@ function startQRCycle() {
 function refreshQR() {
   currentToken = generateToken();
   tokenExpiry = Date.now() + (QR_SEC * 1000);
+  // Store current valid token in sessionStorage for checkin page to validate
+  sessionStorage.setItem('valid_token', currentToken);
+  sessionStorage.setItem('token_expiry', tokenExpiry);
 
-  // Encode token + office location into QR
-  const payload = JSON.stringify({
-    token: currentToken,
-    expiry: tokenExpiry,
-    office: officeLocation ? { lat: officeLocation.lat, lng: officeLocation.lng } : null
+  const url = `${CHECKIN_URL}?token=${currentToken}&lat=${officeLocation.lat}&lng=${officeLocation.lng}&exp=${tokenExpiry}`;
+
+  const container = document.getElementById('qrCanvas');
+  container.innerHTML = '';
+  qrInstance = new QRCode(container, {
+    text: url,
+    width: 200, height: 200,
+    colorDark: '#1a1a1a', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
   });
 
-  const canvas = document.getElementById('qrCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 180, 180);
-  try { QRCode.toCanvas(canvas, payload, { width: 180, margin: 1, color: { dark: '#1a1a1a', light: '#ffffff' } }); } catch(e) {}
-  document.getElementById('tokenBadge').textContent = 'Token: ' + currentToken.slice(4, 14) + '...';
+  document.getElementById('scanUrl').textContent = 'Scan opens: ' + CHECKIN_URL + '?token=...';
   updateTimer();
 }
 
@@ -363,186 +239,43 @@ function updateTimer() {
   document.getElementById('timerTxt').textContent = 'Refreshing in ' + timerSec + 's';
 }
 
-// ── GEO CHECK FOR TEACHER ──
-function checkTeacherGeo() {
-  const dot = document.getElementById('geoDot');
-  const txt = document.getElementById('geoTxt');
-
-  if (!navigator.geolocation) {
-    dot.className = 'dot red';
-    txt.textContent = 'Geolocation not supported on this device.';
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      teacherLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-
-      if (!officeLocation) {
-        dot.className = 'dot orange';
-        txt.textContent = 'Office location not set by admin yet.';
-        return;
-      }
-
-      const dist = Math.round(getDistance(teacherLocation.lat, teacherLocation.lng, officeLocation.lat, officeLocation.lng));
-
-      if (dist <= GEO_RADIUS) {
-        dot.className = 'dot green';
-        txt.textContent = `✓ You are ${dist}m from office — within range`;
-        if (!deviceSubmitted) enableForm();
-      } else {
-        dot.className = 'dot red';
-        txt.textContent = `✗ You are ${dist}m away — must be within 100m`;
-        disableForm('You must be within 100 meters of the office to mark attendance.');
-      }
-    },
-    err => {
-      dot.className = 'dot red';
-      txt.textContent = 'Location access denied. Please enable GPS.';
-      disableForm('Enable location access to mark attendance.');
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
+// Poll Google Sheets every 10 seconds to show live attendance
+function startPolling() {
+  fetchAttendance();
+  pollInt = setInterval(fetchAttendance, 10000);
 }
 
-function enableForm() {
-  document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = false);
-  if (selectedTeacher) document.getElementById('submitBtn').disabled = false;
-}
-
-function disableForm(msg) {
-  document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = true);
-  document.getElementById('submitBtn').disabled = true;
-  if (msg) { document.getElementById('errTxt').textContent = msg; }
-}
-
-// ── TEACHER LIST ──
-function buildTeacherList() {
-  const list = document.getElementById('teacherList');
-  list.innerHTML = '';
-  TEACHERS.forEach(name => {
-    const btn = document.createElement('button');
-    btn.className = 'teacher-btn';
-    btn.textContent = name;
-    btn.disabled = true;
-    btn.onclick = () => selectTeacher(name);
-    list.appendChild(btn);
-  });
-}
-
-function selectTeacher(name) {
-  if (deviceSubmitted) return;
-  selectedTeacher = name;
-  document.querySelectorAll('.teacher-btn').forEach(b => {
-    b.classList.toggle('selected', b.textContent === name);
-  });
-  document.getElementById('submitBtn').disabled = false;
-  document.getElementById('errTxt').textContent = '';
-}
-
-// ── SUBMIT ──
-async function submitAttendance() {
-  const err = document.getElementById('errTxt');
-  const saving = document.getElementById('savingTxt');
-  err.textContent = ''; saving.textContent = '';
-
-  if (!selectedTeacher) { err.textContent = 'Please select your name.'; return; }
-
-  // Token validation — check current token is still valid
-  if (!currentToken || Date.now() > tokenExpiry) {
-    err.textContent = 'QR code has expired. Please scan the new QR code.';
-    return;
-  }
-
-  // Geo validation
-  if (!teacherLocation || !officeLocation) {
-    err.textContent = 'Location not verified. Please wait for GPS check.';
-    return;
-  }
-
-  const dist = Math.round(getDistance(teacherLocation.lat, teacherLocation.lng, officeLocation.lat, officeLocation.lng));
-  if (dist > GEO_RADIUS) {
-    err.textContent = `You are ${dist}m away from the office. Must be within 100m.`;
-    return;
-  }
-
-  // Duplicate check
-  if (attendance.find(r => r.name === selectedTeacher)) {
-    err.textContent = selectedTeacher + ' has already marked attendance today.';
-    lockForm();
-    return;
-  }
-
-  const now = new Date();
-  const record = {
-    name: selectedTeacher,
-    date: now.toLocaleDateString('en-IN'),
-    time: fmtTime(),
-    distance: dist + 'm',
-    token: currentToken.slice(0, 12)
-  };
-
-  attendance.push(record);
-  lockForm();
-  renderLog();
-
-  saving.textContent = 'Saving to Google Sheets...';
+async function fetchAttendance() {
   try {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify({ ...record, type: 'teacher' }));
-    await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: formData });
-    saving.textContent = '✓ Saved to Google Sheets';
-    setTimeout(() => { saving.textContent = ''; }, 3000);
-  } catch(e) {
-    saving.textContent = '⚠ Could not reach Sheets — record kept locally.';
-  }
+    const res = await fetch(SCRIPT_URL + '?action=getTeachers&date=' + new Date().toLocaleDateString('en-IN'));
+    const data = await res.json();
+    if (data.records) { attendance = data.records; renderLog(); }
+  } catch(e) { /* silent fail */ }
 }
 
-function lockForm() {
-  deviceSubmitted = true;
-  document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = true);
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('lockBadge').style.display = 'inline-flex';
-  document.getElementById('errTxt').textContent = '';
-  document.getElementById('doneBox').style.display = 'block';
-  document.getElementById('doneBox').innerHTML = `✓ Attendance marked for <strong>${selectedTeacher}</strong> at ${fmtTime()}.<br>This device is now locked for this session.`;
-}
-
-// ── LOG ──
 function renderLog() {
   document.getElementById('logCount').textContent = attendance.length;
   const body = document.getElementById('logBody');
-
-  if (!attendance.length) {
-    body.innerHTML = '<div class="empty-log">No attendance recorded yet.</div>';
-  } else {
+  if (!attendance.length) { body.innerHTML = '<div class="empty-log">Waiting for teachers to check in...</div>'; }
+  else {
     body.innerHTML = `<table class="log-table">
       <thead><tr><th>#</th><th>Name</th><th>Time</th><th>Distance</th><th>Status</th></tr></thead>
-      <tbody>${attendance.map((r,i) => `<tr>
-        <td>${i+1}</td>
-        <td>${r.name}</td>
-        <td>${r.time}</td>
-        <td>${r.distance}</td>
-        <td><span class="present-badge">Present</span></td>
-      </tr>`).join('')}</tbody>
+      <tbody>${attendance.map((r,i)=>`<tr><td>${i+1}</td><td>${r.name||r[1]}</td><td>${r.time||r[3]}</td><td>${r.distance||r[4]}</td><td><span class="present-badge">Present</span></td></tr>`).join('')}</tbody>
     </table>`;
   }
-
-  // Absent list
-  const present = attendance.map(r => r.name);
+  const present = attendance.map(r => r.name || r[1]);
   const absent = TEACHERS.filter(t => !present.includes(t));
-  document.getElementById('absentChips').innerHTML = absent.map(n => `<span class="absent-chip">${n}</span>`).join('');
+  document.getElementById('absentChips').innerHTML = absent.map(n=>`<span class="absent-chip">${n}</span>`).join('');
 }
 
-// ── EXPORT ──
 function exportCSV() {
-  if (!attendance.length) { alert('No records to export.'); return; }
-  const rows = [['#','Name','Date','Time','Distance from Office','Token'],
-    ...attendance.map((r,i) => [i+1, r.name, r.date, r.time, r.distance, r.token])];
-  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+  if (!attendance.length) { alert('No records yet.'); return; }
+  const rows = [['#','Name','Date','Time','Distance'],
+    ...attendance.map((r,i)=>[i+1, r.name||r[1], r.date||r[2], r.time||r[3], r.distance||r[4]])];
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = 'teacher_attendance_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'teacher_attendance_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
 }
 </script>
