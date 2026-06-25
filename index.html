@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance System</title>
+<title>Teacher Attendance System</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,6 +13,9 @@
     --green-border: #97C459;
     --green-text: #3B6D11;
     --red: #E24B4A;
+    --red-light: #FEE2E2;
+    --orange: #F59E0B;
+    --orange-light: #FEF3C7;
     --bg: #f5f5f3;
     --card: #ffffff;
     --border: #e0dfd8;
@@ -25,60 +28,79 @@
 
   /* NAV */
   nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; }
-  .nav-logo { font-size: 15px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .nav-logo { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .nav-logo span { width: 28px; height: 28px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
-  .nav-right { font-size: 12px; color: var(--text-muted); }
+  .nav-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--orange-light); color: #92400E; border: 1px solid var(--orange); font-weight: 500; }
 
-  /* LAYOUT */
-  .container { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .container { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem; }
 
-  /* HOME */
+  /* PAGES */
   .page { display: none; }
   .page.active { display: block; }
+
+  /* ── ADMIN PAGE ── */
   .page-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
   .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
 
-  /* BATCH GRID */
-  .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-  .batch-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.1rem 0.9rem; }
-  .batch-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-  .batch-name { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
-  .sec-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-  .sec-btn { padding: 5px 14px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text); cursor: pointer; transition: all 0.15s; }
-  .sec-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
+  .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+  .admin-card-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .admin-card-title { font-size: 14px; font-weight: 600; }
+  .admin-card-body { padding: 16px; }
 
-  /* QR PAGE */
+  .location-status { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); margin-bottom: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot.green { background: var(--green); }
+  .dot.orange { background: var(--orange); }
+  .dot.red { background: var(--red); }
+
+  .set-location-btn { width: 100%; padding: 9px; font-size: 13px; font-weight: 500; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+  .set-location-btn:hover { opacity: 0.9; }
+  .set-location-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .start-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; margin-top: 4px; }
+  .start-btn:hover { opacity: 0.9; }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── QR PAGE ── */
   .qr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
   .back-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); color: var(--text); cursor: pointer; }
   .back-btn:hover { background: var(--bg); }
-  .qr-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: var(--green-light); color: var(--green-text); border: 1px solid var(--green-border); font-weight: 500; }
 
   .qr-layout { display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start; }
-  @media(max-width: 600px) { .qr-layout { grid-template-columns: 1fr; } }
+  @media(max-width: 580px) { .qr-layout { grid-template-columns: 1fr; } }
 
   .qr-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
   .qr-card canvas { border-radius: 8px; }
   .timer-wrap { height: 5px; background: var(--bg); border-radius: 3px; margin-top: 12px; overflow: hidden; }
   .timer-bar { height: 5px; background: var(--green); border-radius: 3px; transition: width 1s linear; }
   .timer-txt { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-  .qr-hint { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+  .qr-hint { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
+  .token-badge { display: inline-block; font-size: 10px; font-family: monospace; padding: 2px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; margin-top: 8px; color: var(--text-muted); word-break: break-all; }
 
+  /* ── FORM CARD ── */
   .form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-  .form-heading { font-size: 14px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
-  .locked-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #fef3cd; color: #856404; border: 1px solid #ffc107; }
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
-  .field input { width: 100%; padding: 9px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
-  .field input:focus { border-color: var(--green); background: #fff; }
-  .field input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg); }
-  .submit-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; margin-top: 2px; }
+  .form-heading { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .form-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 1rem; }
+  .locked-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #FEF3C7; color: #92400E; border: 1px solid var(--orange); }
+
+  .teacher-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  @media(max-width: 400px) { .teacher-list { grid-template-columns: 1fr; } }
+  .teacher-btn { padding: 9px 12px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.15s; }
+  .teacher-btn:hover:not(:disabled) { border-color: var(--green); background: var(--green-light); color: var(--green-text); }
+  .teacher-btn.selected { border-color: var(--green); background: var(--green-light); color: var(--green-text); font-weight: 600; }
+  .teacher-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .geo-status { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); margin-bottom: 12px; }
+
+  .submit-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; }
   .submit-btn:hover { opacity: 0.9; }
   .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .err-txt { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 16px; }
+  .err-txt { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 16px; text-align: center; }
   .saving-txt { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; }
-  .done-box { background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--green-text); margin-top: 12px; display: none; line-height: 1.5; }
+  .done-box { background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--green-text); margin-top: 12px; display: none; line-height: 1.6; }
+  .blocked-box { background: var(--red-light); border: 1px solid #FCA5A5; border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: #991B1B; margin-top: 12px; display: none; line-height: 1.6; }
 
-  /* LOG */
+  /* ── LOG ── */
   .log-section { margin-top: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .log-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
   .log-title { font-size: 13px; font-weight: 600; }
@@ -88,13 +110,16 @@
   .log-body { padding: 0 16px 12px; }
   .log-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
   .log-table th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--border); }
-  .log-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .log-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
   .log-table tr:last-child td { border-bottom: none; }
   .empty-log { font-size: 12px; color: var(--text-muted); padding: 12px 0; }
+  .present-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--green-light); color: var(--green-text); border: 1px solid var(--green-border); }
 
-  /* SHEETS STATUS */
-  .sheets-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); margin-top: 10px; justify-content: center; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  /* ABSENT LIST */
+  .absent-section { margin-top: 1rem; padding: 12px 16px; border-top: 1px solid var(--border); }
+  .absent-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .absent-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .absent-chip { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--red-light); color: #991B1B; border: 1px solid #FCA5A5; }
 </style>
 </head>
 <body>
@@ -102,29 +127,57 @@
 <nav>
   <div class="nav-logo">
     <span>✓</span>
-    Attendance System
+    Teacher Attendance
   </div>
-  <div class="nav-right">Hana Global</div>
+  <span class="nav-tag">Admin Panel</span>
 </nav>
 
 <div class="container">
 
-  <!-- HOME PAGE -->
-  <div class="page active" id="homePage">
-    <div class="page-title">Take Attendance</div>
-    <div class="page-sub">Select a batch and section to display the QR code on the projector.</div>
-    <div class="batch-grid" id="batchGrid"></div>
+  <!-- ADMIN PAGE -->
+  <div class="page active" id="adminPage">
+    <div class="page-title">Teacher Attendance</div>
+    <div class="page-sub">Set the office location, then start the session to generate the QR code.</div>
+
+    <!-- Location Setup -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">📍 Office Location</div>
+        <span id="locSavedBadge" style="display:none;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);">✓ Set</span>
+      </div>
+      <div class="admin-card-body">
+        <div class="location-status" id="locStatus">
+          <span class="dot orange"></span>
+          <span id="locStatusTxt">Location not set yet</span>
+        </div>
+        <button class="set-location-btn" id="setLocBtn" onclick="setOfficeLocation()">
+          📡 Capture Current Location as Office
+        </button>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Click this once while you're at the office. Teachers must be within 100m to mark attendance.</div>
+      </div>
+    </div>
+
+    <!-- Start Session -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">🎯 Start Attendance Session</div>
+      </div>
+      <div class="admin-card-body">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Once started, a QR code will be displayed. The QR rotates every 15 seconds with a new token — only valid scans from within 100m will be accepted.</div>
+        <button class="start-btn" id="startBtn" onclick="startSession()" disabled>Start Session →</button>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;" id="startHint">Set office location first to enable this.</div>
+      </div>
+    </div>
   </div>
 
   <!-- QR PAGE -->
   <div class="page" id="qrPage">
     <div class="qr-header">
-      <button class="back-btn" onclick="goHome()">&#8592; Back</button>
+      <button class="back-btn" onclick="goAdmin()">← Back</button>
       <div>
-        <div style="font-size:16px;font-weight:600;" id="pageTitle"></div>
-        <div style="font-size:12px;color:var(--text-muted);" id="pageDate"></div>
+        <div style="font-size:16px;font-weight:600;">Teacher Check-In</div>
+        <div style="font-size:12px;color:var(--text-muted);" id="qrPageDate"></div>
       </div>
-      <span class="qr-badge" id="qrBadge"></span>
     </div>
 
     <div class="qr-layout">
@@ -132,28 +185,34 @@
         <canvas id="qrCanvas" width="180" height="180"></canvas>
         <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
         <div class="timer-txt" id="timerTxt">Refreshing in 15s</div>
-        <div class="qr-hint">QR rotates every 15 seconds.<br>Screenshots won't work.</div>
-        <div class="sheets-row"><span class="dot"></span> Saving to Google Sheets</div>
+        <div class="qr-hint">
+          QR rotates every 15 seconds.<br>
+          Screenshots won't work.<br>
+          Must be within 100m of office.
+        </div>
+        <div class="token-badge" id="tokenBadge"></div>
       </div>
 
       <div>
         <div class="form-card">
           <div class="form-heading">
-            Mark your attendance
+            Select your name
             <span class="locked-pill" id="lockBadge" style="display:none">🔒 Locked</span>
           </div>
-          <div class="field">
-            <label>Full name</label>
-            <input type="text" id="stuName" placeholder="Enter your full name">
+          <div class="form-sub">Choose your name from the list below to mark attendance.</div>
+
+          <div class="geo-status" id="geoStatus">
+            <span class="dot orange" id="geoDot"></span>
+            <span id="geoTxt">Checking your location...</span>
           </div>
-          <div class="field">
-            <label>Phone number</label>
-            <input type="tel" id="stuPhone" placeholder="10-digit number" maxlength="10">
-          </div>
-          <button class="submit-btn" id="submitBtn" onclick="submitAttendance()">Mark Attendance</button>
+
+          <div class="teacher-list" id="teacherList"></div>
+
+          <button class="submit-btn" id="submitBtn" onclick="submitAttendance()" disabled>Mark Attendance</button>
           <div class="err-txt" id="errTxt"></div>
           <div class="saving-txt" id="savingTxt"></div>
           <div class="done-box" id="doneBox"></div>
+          <div class="blocked-box" id="blockedBox"></div>
         </div>
       </div>
     </div>
@@ -161,108 +220,116 @@
     <div class="log-section">
       <div class="log-header">
         <div>
-          <div class="log-title">Attendance Log</div>
-          <div class="log-count"><span id="logCount">0</span> students marked present</div>
+          <div class="log-title">Today's Attendance</div>
+          <div class="log-count"><span id="logCount">0</span> / 8 teachers present</div>
         </div>
-        <button class="export-btn" onclick="exportCSV()">&#8595; Export CSV</button>
+        <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
       </div>
       <div class="log-body">
         <div id="logBody"><div class="empty-log">No attendance recorded yet.</div></div>
+      </div>
+      <div class="absent-section">
+        <div class="absent-title">Not yet marked:</div>
+        <div class="absent-chips" id="absentChips"></div>
       </div>
     </div>
   </div>
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8Jc4aJwQYNL_69UAfEEj15MHnff2EsCXmJo_-NS0ITFF54MehTfGibV2G7utVTbOldw/exec';
-const BATCHES = ['Batch 1','Batch 2','Batch 3','Batch 4'];
-const SECTIONS = ['N4','N5'];
+const TEACHERS = ['Pranita','Laveena','Rishu Kumar','Ankit','Sai Adarsh','Mayu','Shruthi Lakshmi','Christene'];
 const QR_SEC = 15;
+const GEO_RADIUS = 100; // meters
 
-let curBatch = '', curSection = '';
+let officeLocation = null;
+let currentToken = '';
+let tokenExpiry = 0;
 let timerSec = QR_SEC, timerInt = null;
-let attendance = {};
-let deviceSubmitted = {};
+let attendance = [];
+let deviceSubmitted = false;
+let selectedTeacher = '';
+let teacherLocation = null;
 
-function getKey() { return curBatch + '||' + curSection; }
+// ── UTILS ──
+function getDeviceId() {
+  let id = sessionStorage.getItem('teacher_dev_id');
+  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2) + Date.now(); sessionStorage.setItem('teacher_dev_id', id); }
+  return id;
+}
 
 function fmtDate() {
   return new Date().toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
 }
 
-function getDeviceId() {
-  let id = sessionStorage.getItem('att_dev_id');
-  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2) + Date.now(); sessionStorage.setItem('att_dev_id', id); }
-  return id;
+function fmtTime() {
+  return new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 }
 
-function buildHome() {
-  const g = document.getElementById('batchGrid');
-  g.innerHTML = '';
-  BATCHES.forEach(b => {
-    const c = document.createElement('div');
-    c.className = 'batch-card';
-    c.innerHTML = `<div class="batch-label">Batch</div><div class="batch-name">${b}</div><div class="sec-btns">${SECTIONS.map(s => `<button class="sec-btn" onclick="openQR('${b}','${s}')">${s}</button>`).join('')}</div>`;
-    g.appendChild(c);
-  });
+function generateToken() {
+  return 'TCH_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+// ── DISTANCE CALCULATION (Haversine formula) ──
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function openQR(batch, section) {
-  curBatch = batch; curSection = section;
-  const k = getKey();
-  if (!attendance[k]) attendance[k] = [];
-  document.getElementById('pageTitle').textContent = batch + ' · Section ' + section;
-  document.getElementById('pageDate').textContent = fmtDate();
-  document.getElementById('qrBadge').textContent = batch + ' ' + section;
-  showPage('qrPage');
-  resetForm();
-  checkDeviceLock();
-  startCycle();
+// ── ADMIN: SET OFFICE LOCATION ──
+function setOfficeLocation() {
+  const btn = document.getElementById('setLocBtn');
+  btn.disabled = true;
+  btn.textContent = '📡 Getting location...';
+  document.getElementById('locStatusTxt').textContent = 'Requesting GPS...';
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      officeLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+      document.getElementById('locStatus').innerHTML = `<span class="dot green"></span><span>Office set: ${officeLocation.lat.toFixed(5)}, ${officeLocation.lng.toFixed(5)} (±${Math.round(officeLocation.accuracy)}m)</span>`;
+      document.getElementById('locSavedBadge').style.display = 'inline-block';
+      btn.textContent = '✓ Location Captured — Click to Update';
+      btn.disabled = false;
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startHint').textContent = 'Location set! You can now start the session.';
+    },
+    err => {
+      document.getElementById('locStatusTxt').textContent = 'Could not get location. Please allow location access.';
+      btn.disabled = false;
+      btn.textContent = '📡 Try Again';
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// ── START SESSION ──
+function startSession() {
+  document.getElementById('adminPage').classList.remove('active');
+  document.getElementById('qrPage').classList.add('active');
+  document.getElementById('qrPageDate').textContent = fmtDate();
+  deviceSubmitted = false;
+  selectedTeacher = '';
+  buildTeacherList();
+  checkTeacherGeo();
+  startQRCycle();
   renderLog();
 }
 
-function goHome() {
+function goAdmin() {
   clearInterval(timerInt);
-  resetForm();
-  showPage('homePage');
+  document.getElementById('qrPage').classList.remove('active');
+  document.getElementById('adminPage').classList.add('active');
 }
 
-function resetForm() {
-  document.getElementById('stuName').value = '';
-  document.getElementById('stuPhone').value = '';
-  document.getElementById('errTxt').textContent = '';
-  document.getElementById('savingTxt').textContent = '';
-  document.getElementById('doneBox').style.display = 'none';
-}
-
-function checkDeviceLock() {
-  const k = getKey();
-  const locked = deviceSubmitted[k] && deviceSubmitted[k][getDeviceId()];
-  setFormLocked(locked);
-  if (locked) {
-    document.getElementById('doneBox').style.display = 'block';
-    document.getElementById('doneBox').textContent = '✓ You have already marked attendance for this session. This device is locked.';
-  }
-}
-
-function setFormLocked(locked) {
-  document.getElementById('stuName').disabled = locked;
-  document.getElementById('stuPhone').disabled = locked;
-  document.getElementById('submitBtn').disabled = locked;
-  document.getElementById('lockBadge').style.display = locked ? 'inline-flex' : 'none';
-}
-
-function newSessionId() {
-  return curBatch + '_' + curSection + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
-}
-
-function startCycle() {
+// ── QR CYCLE WITH TOKEN ──
+function startQRCycle() {
   clearInterval(timerInt);
   timerSec = QR_SEC;
   refreshQR();
@@ -274,11 +341,21 @@ function startCycle() {
 }
 
 function refreshQR() {
-  const id = newSessionId();
+  currentToken = generateToken();
+  tokenExpiry = Date.now() + (QR_SEC * 1000);
+
+  // Encode token + office location into QR
+  const payload = JSON.stringify({
+    token: currentToken,
+    expiry: tokenExpiry,
+    office: officeLocation ? { lat: officeLocation.lat, lng: officeLocation.lng } : null
+  });
+
   const canvas = document.getElementById('qrCanvas');
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 180, 180);
-  try { QRCode.toCanvas(canvas, id, {width:180, margin:1, color:{dark:'#1a1a1a', light:'#ffffff'}}); } catch(e) {}
+  try { QRCode.toCanvas(canvas, payload, { width: 180, margin: 1, color: { dark: '#1a1a1a', light: '#ffffff' } }); } catch(e) {}
+  document.getElementById('tokenBadge').textContent = 'Token: ' + currentToken.slice(4, 14) + '...';
   updateTimer();
 }
 
@@ -287,36 +364,127 @@ function updateTimer() {
   document.getElementById('timerTxt').textContent = 'Refreshing in ' + timerSec + 's';
 }
 
+// ── GEO CHECK FOR TEACHER ──
+function checkTeacherGeo() {
+  const dot = document.getElementById('geoDot');
+  const txt = document.getElementById('geoTxt');
+
+  if (!navigator.geolocation) {
+    dot.className = 'dot red';
+    txt.textContent = 'Geolocation not supported on this device.';
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      teacherLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+      if (!officeLocation) {
+        dot.className = 'dot orange';
+        txt.textContent = 'Office location not set by admin yet.';
+        return;
+      }
+
+      const dist = Math.round(getDistance(teacherLocation.lat, teacherLocation.lng, officeLocation.lat, officeLocation.lng));
+
+      if (dist <= GEO_RADIUS) {
+        dot.className = 'dot green';
+        txt.textContent = `✓ You are ${dist}m from office — within range`;
+        if (!deviceSubmitted) enableForm();
+      } else {
+        dot.className = 'dot red';
+        txt.textContent = `✗ You are ${dist}m away — must be within 100m`;
+        disableForm('You must be within 100 meters of the office to mark attendance.');
+      }
+    },
+    err => {
+      dot.className = 'dot red';
+      txt.textContent = 'Location access denied. Please enable GPS.';
+      disableForm('Enable location access to mark attendance.');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function enableForm() {
+  document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = false);
+  if (selectedTeacher) document.getElementById('submitBtn').disabled = false;
+}
+
+function disableForm(msg) {
+  document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = true);
+  document.getElementById('submitBtn').disabled = true;
+  if (msg) { document.getElementById('errTxt').textContent = msg; }
+}
+
+// ── TEACHER LIST ──
+function buildTeacherList() {
+  const list = document.getElementById('teacherList');
+  list.innerHTML = '';
+  TEACHERS.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'teacher-btn';
+    btn.textContent = name;
+    btn.disabled = true;
+    btn.onclick = () => selectTeacher(name);
+    list.appendChild(btn);
+  });
+}
+
+function selectTeacher(name) {
+  if (deviceSubmitted) return;
+  selectedTeacher = name;
+  document.querySelectorAll('.teacher-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === name);
+  });
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('errTxt').textContent = '';
+}
+
+// ── SUBMIT ──
 async function submitAttendance() {
-  const name = document.getElementById('stuName').value.trim();
-  const phone = document.getElementById('stuPhone').value.trim();
   const err = document.getElementById('errTxt');
   const saving = document.getElementById('savingTxt');
   err.textContent = ''; saving.textContent = '';
 
-  if (!name) { err.textContent = 'Please enter your full name.'; return; }
-  if (!/^\d{10}$/.test(phone)) { err.textContent = 'Enter a valid 10-digit phone number.'; return; }
+  if (!selectedTeacher) { err.textContent = 'Please select your name.'; return; }
 
-  const k = getKey();
-  const recs = attendance[k];
+  // Token validation — check current token is still valid
+  if (!currentToken || Date.now() > tokenExpiry) {
+    err.textContent = 'QR code has expired. Please scan the new QR code.';
+    return;
+  }
 
-  if (recs.find(r => r.phone === phone)) {
-    err.textContent = 'This phone number already has attendance marked.';
-    lockDevice(k, name);
+  // Geo validation
+  if (!teacherLocation || !officeLocation) {
+    err.textContent = 'Location not verified. Please wait for GPS check.';
+    return;
+  }
+
+  const dist = Math.round(getDistance(teacherLocation.lat, teacherLocation.lng, officeLocation.lat, officeLocation.lng));
+  if (dist > GEO_RADIUS) {
+    err.textContent = `You are ${dist}m away from the office. Must be within 100m.`;
+    return;
+  }
+
+  // Duplicate check
+  if (attendance.find(r => r.name === selectedTeacher)) {
+    err.textContent = selectedTeacher + ' has already marked attendance today.';
+    lockForm();
     return;
   }
 
   const now = new Date();
   const record = {
-    name, phone,
+    name: selectedTeacher,
     date: now.toLocaleDateString('en-IN'),
-    time: now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'}),
-    batch: curBatch,
-    section: curSection
+    time: fmtTime(),
+    distance: dist + 'm',
+    token: currentToken.slice(0, 12)
   };
 
-  recs.push(record);
-  lockDevice(k, name);
+  attendance.push(record);
+  lockForm();
   renderLog();
 
   saving.textContent = 'Saving to Google Sheets...';
@@ -324,8 +492,8 @@ async function submitAttendance() {
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(record)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...record, type: 'teacher' })
     });
     saving.textContent = '✓ Saved to Google Sheets';
     setTimeout(() => { saving.textContent = ''; }, 3000);
@@ -334,35 +502,53 @@ async function submitAttendance() {
   }
 }
 
-function lockDevice(k, name) {
-  if (!deviceSubmitted[k]) deviceSubmitted[k] = {};
-  deviceSubmitted[k][getDeviceId()] = true;
-  setFormLocked(true);
+function lockForm() {
+  deviceSubmitted = true;
+  document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = true);
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('lockBadge').style.display = 'inline-flex';
   document.getElementById('errTxt').textContent = '';
   document.getElementById('doneBox').style.display = 'block';
-  document.getElementById('doneBox').textContent = '✓ Attendance marked for ' + name + '. This form is now locked for your device.';
+  document.getElementById('doneBox').innerHTML = `✓ Attendance marked for <strong>${selectedTeacher}</strong> at ${fmtTime()}.<br>This device is now locked for this session.`;
 }
 
+// ── LOG ──
 function renderLog() {
-  const recs = attendance[getKey()] || [];
-  document.getElementById('logCount').textContent = recs.length;
+  document.getElementById('logCount').textContent = attendance.length;
   const body = document.getElementById('logBody');
-  if (!recs.length) { body.innerHTML = '<div class="empty-log">No attendance recorded yet.</div>'; return; }
-  body.innerHTML = `<table class="log-table"><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Date</th><th>Time</th></tr></thead><tbody>${recs.map((r,i) => `<tr><td>${i+1}</td><td>${r.name}</td><td>${r.phone}</td><td>${r.date}</td><td>${r.time}</td></tr>`).join('')}</tbody></table>`;
+
+  if (!attendance.length) {
+    body.innerHTML = '<div class="empty-log">No attendance recorded yet.</div>';
+  } else {
+    body.innerHTML = `<table class="log-table">
+      <thead><tr><th>#</th><th>Name</th><th>Time</th><th>Distance</th><th>Status</th></tr></thead>
+      <tbody>${attendance.map((r,i) => `<tr>
+        <td>${i+1}</td>
+        <td>${r.name}</td>
+        <td>${r.time}</td>
+        <td>${r.distance}</td>
+        <td><span class="present-badge">Present</span></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  // Absent list
+  const present = attendance.map(r => r.name);
+  const absent = TEACHERS.filter(t => !present.includes(t));
+  document.getElementById('absentChips').innerHTML = absent.map(n => `<span class="absent-chip">${n}</span>`).join('');
 }
 
+// ── EXPORT ──
 function exportCSV() {
-  const recs = attendance[getKey()] || [];
-  if (!recs.length) { alert('No records to export.'); return; }
-  const rows = [['#','Name','Phone','Date','Time','Batch','Section'], ...recs.map((r,i) => [i+1,r.name,r.phone,r.date,r.time,r.batch,r.section])];
+  if (!attendance.length) { alert('No records to export.'); return; }
+  const rows = [['#','Name','Date','Time','Distance from Office','Token'],
+    ...attendance.map((r,i) => [i+1, r.name, r.date, r.time, r.distance, r.token])];
   const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = curBatch + '_' + curSection + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'teacher_attendance_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
-
-buildHome();
 </script>
 </body>
 </html>
