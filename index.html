@@ -237,9 +237,8 @@
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6TtELWCoi3vpOQgx2tg0Wg6rSm7H_jnFFEI0VpIH12UwOpiGWrrKfMElGDJbEcg8TpQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_dzT6sFIHkFQumTulslJmG7f7e2rvdrEsPqi5W5FwSEQtSmllw01G_-8xqHrr20yiNQ/exec';
 const TEACHERS = ['Pranita','Laveena','Rishu Kumar','Ankit','Sai Adarsh','Mayu','Shruthi Lakshmi','Christene'];
 const QR_SEC = 15;
 const GEO_RADIUS = 100; // meters
@@ -489,12 +488,9 @@ async function submitAttendance() {
 
   saving.textContent = 'Saving to Google Sheets...';
   try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...record, type: 'teacher' })
-    });
+    const formData = new FormData();
+    formData.append('data', JSON.stringify({ ...record, type: 'teacher' }));
+    await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: formData });
     saving.textContent = '✓ Saved to Google Sheets';
     setTimeout(() => { saving.textContent = ''; }, 3000);
   } catch(e) {
