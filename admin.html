@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel — Teacher Attendance</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>Admin — Teacher Attendance</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --green:#1D9E75;--green-light:#EAF3DE;--green-border:#97C459;--green-text:#3B6D11;
-  --red:#E24B4A;--red-light:#FEE2E2;--orange:#F59E0B;--orange-light:#FEF3C7;
+  --red:#E24B4A;--red-light:#FEE2E2;--blue:#3B82F6;--blue-light:#EFF6FF;--blue-border:#93C5FD;--blue-text:#1E40AF;
+  --orange:#F59E0B;--orange-light:#FEF3C7;
   --bg:#f5f5f3;--card:#ffffff;--border:#e0dfd8;--text:#1a1a1a;--text-muted:#6b6b68;
   --radius:12px;--radius-sm:8px;
 }
@@ -18,7 +18,7 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
 .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
 .nav-logo span{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
 .nav-tag{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--orange-light);color:#92400E;border:1px solid var(--orange);font-weight:500;}
-.container{max-width:900px;margin:0 auto;padding:1.5rem 1rem;}
+.container{max-width:860px;margin:0 auto;padding:1.5rem 1rem;}
 .page{display:none;}.page.active{display:block;}
 .page-title{font-size:20px;font-weight:600;margin-bottom:4px;}
 .page-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;}
@@ -29,23 +29,18 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
 .loc-status{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);margin-bottom:12px;}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .dot.green{background:var(--green);}.dot.orange{background:var(--orange);}.dot.red{background:var(--red);}
-.btn{width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:opacity 0.15s;}
+.btn{width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;}
 .btn-green{background:var(--green);color:#fff;}.btn-green:hover{opacity:0.9;}.btn-green:disabled{opacity:0.4;cursor:not-allowed;}
-.hint{font-size:11px;color:var(--text-muted);margin-top:8px;}
+.hint{font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.6;}
 
-/* QR PAGE */
-.qr-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;}
-.back-btn{padding:7px 14px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);cursor:pointer;}
-.back-btn:hover{background:var(--bg);}
+/* QR DISPLAY */
 .qr-layout{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:start;}
 @media(max-width:600px){.qr-layout{grid-template-columns:1fr;}}
 .qr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;}
-.qr-card canvas{border-radius:8px;}
-.timer-wrap{height:5px;background:var(--bg);border-radius:3px;margin-top:12px;overflow:hidden;}
-.timer-bar{height:5px;background:var(--green);border-radius:3px;transition:width 1s linear;}
-.timer-txt{font-size:12px;color:var(--text-muted);margin-top:6px;}
+.qr-permanent-badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);margin-bottom:10px;font-weight:500;}
 .qr-hint{font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.6;}
-.scan-url{font-size:10px;font-family:monospace;padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-top:8px;word-break:break-all;color:var(--text-muted);}
+.print-btn{margin-top:12px;width:100%;padding:8px;font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);cursor:pointer;}
+.print-btn:hover{background:var(--green);color:#fff;border-color:var(--green);}
 
 /* LOG */
 .log-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
@@ -54,18 +49,24 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
 .log-count{font-size:12px;color:var(--text-muted);}
 .export-btn{padding:5px 12px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);cursor:pointer;}
 .export-btn:hover{background:var(--green);color:#fff;border-color:var(--green);}
-.log-body{padding:0 16px 12px;}
-.log-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.log-body{padding:0 16px 12px;overflow-x:auto;}
+.log-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;min-width:400px;}
 .log-table th{text-align:left;color:var(--text-muted);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--border);}
 .log-table td{padding:7px 8px;border-bottom:1px solid var(--border);}
 .log-table tr:last-child td{border-bottom:none;}
 .empty-log{font-size:12px;color:var(--text-muted);padding:12px 0;}
-.present-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);}
+.badge-in{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);}
+.badge-out{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;background:var(--blue-light);color:var(--blue-text);border:1px solid var(--blue-border);}
 .absent-section{padding:12px 16px;border-top:1px solid var(--border);}
 .absent-title{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
 .absent-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .absent-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--red-light);color:#991B1B;border:1px solid #FCA5A5;}
 .refresh-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);text-align:center;}
+
+@media print {
+  nav, .card:not(#qrPrintCard), .log-section, .page-title, .page-sub { display: none !important; }
+  #qrPrintCard { border: none !important; box-shadow: none !important; }
+}
 </style>
 </head>
 <body>
@@ -77,12 +78,12 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
 
   <!-- SETUP PAGE -->
   <div class="page active" id="setupPage">
-    <div class="page-title">Setup Attendance Session</div>
-    <div class="page-sub">Capture your office location first, then start the session to generate the QR code for teachers to scan.</div>
+    <div class="page-title">Generate Permanent Door QR</div>
+    <div class="page-sub">Capture the office location once — this generates a permanent QR code to print and stick on the door.</div>
 
     <div class="card">
       <div class="card-header">
-        <div class="card-title">📍 Step 1 — Set Office Location</div>
+        <div class="card-title">📍 Capture Office Location</div>
         <span id="locBadge" style="display:none;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);">✓ Set</span>
       </div>
       <div class="card-body">
@@ -90,188 +91,169 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
           <span class="dot orange"></span>
           <span id="locTxt">Location not captured yet</span>
         </div>
-        <button class="btn btn-green" id="locBtn" onclick="captureLocation()">📡 Capture Current Location as Office</button>
-        <div class="hint">Do this once while you are physically at the office. Teachers must be within 100m to mark attendance.</div>
+        <button class="btn btn-green" id="locBtn" onclick="captureLocation()">📡 Capture Current Location</button>
+        <div class="hint">⚠ Do this while standing at the office entrance/door. This location is permanently embedded in the QR code — teachers must be within 100m to mark attendance.</div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><div class="card-title">🎯 Step 2 — Start Session</div></div>
+      <div class="card-header"><div class="card-title">🖨 Generate & Print QR</div></div>
       <div class="card-body">
-        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">The QR code will rotate every 15 seconds. Teachers scan it with their phone — it opens a check-in form on their device.</div>
-        <button class="btn btn-green" id="startBtn" onclick="startSession()" disabled>Start Session →</button>
-        <div class="hint" id="startHint">Set office location first to enable this.</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Once generated, this QR never changes. Print it and stick it on the office door. Teachers scan it every day to check in and check out.</div>
+        <button class="btn btn-green" id="generateBtn" onclick="generateQR()" disabled>Generate Permanent QR →</button>
+        <div class="hint" id="generateHint">Capture office location first.</div>
       </div>
     </div>
   </div>
 
-  <!-- QR PAGE -->
+  <!-- QR + LOG PAGE -->
   <div class="page" id="qrPage">
-    <div class="qr-header">
-      <button class="back-btn" onclick="goSetup()">← Back</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;">
       <div>
-        <div style="font-size:16px;font-weight:600;">Live QR — Teacher Check-In</div>
-        <div style="font-size:12px;color:var(--text-muted);" id="qrDate"></div>
+        <div class="page-title">Permanent Door QR</div>
+        <div style="font-size:13px;color:var(--text-muted);">This QR never changes. Print it and stick it on the door.</div>
       </div>
+      <button onclick="goSetup()" style="padding:7px 14px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);cursor:pointer;">← Recapture Location</button>
     </div>
 
     <div class="qr-layout">
-      <div class="qr-card">
+      <div class="qr-card" id="qrPrintCard">
+        <div class="qr-permanent-badge">🔒 Permanent QR — Never Rotates</div>
         <div id="qrCanvas"></div>
-        <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
-        <div class="timer-txt" id="timerTxt">Refreshing in 15s</div>
-        <div class="qr-hint">Show this QR on the projector.<br>Teachers scan with their phone camera.<br>Rotates every 15 seconds.</div>
-        <div class="scan-url" id="scanUrl"></div>
+        <div class="qr-hint">
+          📌 Print this and stick on the office door.<br>
+          🟢 <strong>1st scan</strong> = Check-In time<br>
+          🔵 <strong>2nd scan</strong> = Check-Out time
+        </div>
+        <button class="print-btn" onclick="window.print()">🖨 Print QR Code</button>
       </div>
 
       <div class="log-section">
         <div class="log-header">
           <div>
-            <div class="log-title">Today's Attendance</div>
-            <div class="log-count"><span id="logCount">0</span> / 8 present</div>
+            <div class="log-title">Today's Log</div>
+            <div class="log-count" id="logCount">Loading...</div>
           </div>
           <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
         </div>
         <div class="log-body">
-          <div id="logBody"><div class="empty-log">Waiting for teachers to check in...</div></div>
+          <div id="logBody"><div class="empty-log">No records yet today.</div></div>
         </div>
         <div class="absent-section">
-          <div class="absent-title">Not yet marked:</div>
+          <div class="absent-title">Not yet checked in today:</div>
           <div class="absent-chips" id="absentChips"></div>
         </div>
-        <div class="refresh-note">Log updates automatically every 10 seconds as teachers check in.</div>
+        <div class="refresh-note">⟳ Auto-refreshes every 15 seconds</div>
       </div>
     </div>
   </div>
 
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const TEACHERS = ['Pranita','Laveena','Rishu Kumar','Ankit','Sai Adarsh','Mayu','Shruthi Lakshmi','Christene'];
 const CHECKIN_URL = 'https://adarsh961.github.io/Attendance/checkin.html';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfFDGtu9vGwl_qXzRorbP_wcfXXysDF5KJ_IeBocTOJSxlSku355Hae49utOM5ItHhKg/exec';
-const QR_SEC = 15;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzHVuy_bpwh37QNRZu7Folvl5xll7Ze7cjqGVOs3r9YteSmL3t_SM2YA-yae-DNYGx/exec';
 
 let officeLocation = null;
-let currentToken = '';
-let tokenExpiry = 0;
-let timerSec = QR_SEC;
-let timerInt = null;
+let allRecords = [];
 let pollInt = null;
-let attendance = [];
-let qrInstance = null;
 
 function captureLocation() {
   const btn = document.getElementById('locBtn');
   btn.disabled = true; btn.textContent = '📡 Getting GPS...';
   navigator.geolocation.getCurrentPosition(pos => {
     officeLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy) };
-    // Store in sessionStorage so checkin page can't access it (security)
-    sessionStorage.setItem('office_lat', officeLocation.lat);
-    sessionStorage.setItem('office_lng', officeLocation.lng);
-    document.getElementById('locStatus').innerHTML = `<span class="dot green"></span><span>Office set at ${officeLocation.lat.toFixed(5)}, ${officeLocation.lng.toFixed(5)} (±${officeLocation.acc}m accuracy)</span>`;
+    document.getElementById('locStatus').innerHTML = `<span class="dot green"></span><span>Office set: ${officeLocation.lat.toFixed(6)}, ${officeLocation.lng.toFixed(6)} (±${officeLocation.acc}m)</span>`;
     document.getElementById('locBadge').style.display = 'inline-block';
-    btn.textContent = '✓ Location Set — Click to Recapture';
+    btn.textContent = '✓ Location Captured — Click to Redo';
     btn.disabled = false;
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('startHint').textContent = 'Ready! Click to start the attendance session.';
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateHint').textContent = 'Ready! Click to generate the permanent QR code.';
   }, err => {
-    document.getElementById('locTxt').textContent = 'Could not get location. Please allow GPS access.';
+    document.getElementById('locTxt').textContent = 'Could not get location. Allow GPS and try again.';
     btn.disabled = false; btn.textContent = '📡 Try Again';
-  }, { enableHighAccuracy: true, timeout: 10000 });
+  }, {enableHighAccuracy:true, timeout:10000});
 }
 
-function startSession() {
+function generateQR() {
   document.getElementById('setupPage').classList.remove('active');
   document.getElementById('qrPage').classList.add('active');
-  document.getElementById('qrDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  attendance = [];
-  renderLog();
-  startQRCycle();
-  startPolling();
-}
 
-function goSetup() {
-  clearInterval(timerInt);
-  clearInterval(pollInt);
-  document.getElementById('qrPage').classList.remove('active');
-  document.getElementById('setupPage').classList.add('active');
-}
-
-function generateToken() {
-  return Math.random().toString(36).slice(2,10).toUpperCase() + Date.now().toString(36).toUpperCase();
-}
-
-function startQRCycle() {
-  clearInterval(timerInt);
-  timerSec = QR_SEC;
-  refreshQR();
-  timerInt = setInterval(() => {
-    timerSec--;
-    updateTimer();
-    if (timerSec <= 0) { timerSec = QR_SEC; refreshQR(); }
-  }, 1000);
-}
-
-function refreshQR() {
-  currentToken = generateToken();
-  tokenExpiry = Date.now() + (QR_SEC * 1000);
-  // Store current valid token in sessionStorage for checkin page to validate
-  sessionStorage.setItem('valid_token', currentToken);
-  sessionStorage.setItem('token_expiry', tokenExpiry);
-
-  const url = `${CHECKIN_URL}?token=${currentToken}&lat=${officeLocation.lat}&lng=${officeLocation.lng}&exp=${tokenExpiry}`;
+  // Build permanent URL with office location baked in
+  const url = `${CHECKIN_URL}?lat=${officeLocation.lat}&lng=${officeLocation.lng}`;
 
   const container = document.getElementById('qrCanvas');
   container.innerHTML = '';
-  qrInstance = new QRCode(container, {
+  new QRCode(container, {
     text: url,
     width: 200, height: 200,
     colorDark: '#1a1a1a', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.M
   });
 
-  document.getElementById('scanUrl').textContent = 'Scan opens: ' + CHECKIN_URL + '?token=...';
-  updateTimer();
+  fetchTodayLog();
+  pollInt = setInterval(fetchTodayLog, 15000);
 }
 
-function updateTimer() {
-  document.getElementById('timerBar').style.width = ((timerSec / QR_SEC) * 100) + '%';
-  document.getElementById('timerTxt').textContent = 'Refreshing in ' + timerSec + 's';
+function goSetup() {
+  clearInterval(pollInt);
+  document.getElementById('qrPage').classList.remove('active');
+  document.getElementById('setupPage').classList.add('active');
 }
 
-// Poll Google Sheets every 10 seconds to show live attendance
-function startPolling() {
-  fetchAttendance();
-  pollInt = setInterval(fetchAttendance, 10000);
-}
-
-async function fetchAttendance() {
+async function fetchTodayLog() {
   try {
-    const res = await fetch(SCRIPT_URL + '?action=getTeachers&date=' + new Date().toLocaleDateString('en-IN'));
+    const today = new Date().toLocaleDateString('en-IN');
+    const res = await fetch(`${SCRIPT_URL}?action=getTeachers&date=${encodeURIComponent(today)}`);
     const data = await res.json();
-    if (data.records) { attendance = data.records; renderLog(); }
-  } catch(e) { /* silent fail */ }
+    if (data.records) { allRecords = data.records; renderLog(); }
+  } catch(e) { /* silent */ }
 }
 
 function renderLog() {
-  document.getElementById('logCount').textContent = attendance.length;
+  const today = new Date().toLocaleDateString('en-IN');
+  const todayRecs = allRecords.filter(r => (r.date||r[2]) === today);
+
+  // Group by name to show check-in and check-out together
+  const byName = {};
+  TEACHERS.forEach(t => { byName[t] = {in:null, out:null}; });
+  todayRecs.forEach(r => {
+    const name = r.name||r[1];
+    const action = r.action||r[5]||'checkin';
+    const time = r.time||r[3];
+    if (byName[name]) {
+      if (action === 'checkin') byName[name].in = time;
+      else byName[name].out = time;
+    }
+  });
+
+  const checkedIn = TEACHERS.filter(t => byName[t].in);
+  document.getElementById('logCount').textContent = `${checkedIn.length} / ${TEACHERS.length} checked in today`;
+
   const body = document.getElementById('logBody');
-  if (!attendance.length) { body.innerHTML = '<div class="empty-log">Waiting for teachers to check in...</div>'; }
+  const rows = TEACHERS.filter(t => byName[t].in);
+  if (!rows.length) { body.innerHTML = '<div class="empty-log">No check-ins yet today.</div>'; }
   else {
     body.innerHTML = `<table class="log-table">
-      <thead><tr><th>#</th><th>Name</th><th>Time</th><th>Distance</th><th>Status</th></tr></thead>
-      <tbody>${attendance.map((r,i)=>`<tr><td>${i+1}</td><td>${r.name||r[1]}</td><td>${r.time||r[3]}</td><td>${r.distance||r[4]}</td><td><span class="present-badge">Present</span></td></tr>`).join('')}</tbody>
+      <thead><tr><th>#</th><th>Name</th><th>Check-In</th><th>Check-Out</th><th>Status</th></tr></thead>
+      <tbody>${rows.map((name,i) => {
+        const r = byName[name];
+        const status = r.out ? `<span class="badge-out">Complete</span>` : `<span class="badge-in">In Office</span>`;
+        return `<tr><td>${i+1}</td><td>${name}</td><td>${r.in||'—'}</td><td>${r.out||'—'}</td><td>${status}</td></tr>`;
+      }).join('')}</tbody>
     </table>`;
   }
-  const present = attendance.map(r => r.name || r[1]);
-  const absent = TEACHERS.filter(t => !present.includes(t));
+
+  const absent = TEACHERS.filter(t => !byName[t].in);
   document.getElementById('absentChips').innerHTML = absent.map(n=>`<span class="absent-chip">${n}</span>`).join('');
 }
 
 function exportCSV() {
-  if (!attendance.length) { alert('No records yet.'); return; }
-  const rows = [['#','Name','Date','Time','Distance'],
-    ...attendance.map((r,i)=>[i+1, r.name||r[1], r.date||r[2], r.time||r[3], r.distance||r[4]])];
+  if (!allRecords.length) { alert('No records to export.'); return; }
+  const rows = [['#','Name','Action','Date','Time','Distance'],
+    ...allRecords.map((r,i)=>[i+1, r.name||r[1], r.action||r[5]||'checkin', r.date||r[2], r.time||r[3], r.distance||r[4]])];
   const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
