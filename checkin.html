@@ -3,44 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Check-In</title>
+<title>Teacher Check-In / Check-Out</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --green:#1D9E75;--green-light:#EAF3DE;--green-border:#97C459;--green-text:#3B6D11;
-  --red:#E24B4A;--red-light:#FEE2E2;--orange:#F59E0B;--orange-light:#FEF3C7;
+  --red:#E24B4A;--red-light:#FEE2E2;--blue:#3B82F6;--blue-light:#EFF6FF;--blue-border:#93C5FD;--blue-text:#1E40AF;
+  --orange:#F59E0B;--orange-light:#FEF3C7;
   --bg:#f5f5f3;--card:#ffffff;--border:#e0dfd8;--text:#1a1a1a;--text-muted:#6b6b68;
   --radius:12px;--radius-sm:8px;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;align-items:center;height:52px;}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:52px;}
 .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
 .nav-logo span{width:26px;height:26px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
+.nav-date{font-size:12px;color:var(--text-muted);}
 .main{flex:1;display:flex;align-items:center;justify-content:center;padding:1.5rem 1rem;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:400px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:420px;}
 .card-title{font-size:18px;font-weight:600;margin-bottom:4px;}
 .card-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.25rem;}
 
 .status-box{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);margin-bottom:14px;}
-.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:pulse 1.5s infinite;}
-.dot.green{background:var(--green);animation:none;}
-.dot.orange{background:var(--orange);}
-.dot.red{background:var(--red);animation:none;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot.green{background:var(--green);}
+.dot.orange{background:var(--orange);animation:pulse 1.5s infinite;}
+.dot.red{background:var(--red);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
+.action-badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:8px 14px;border-radius:20px;margin-bottom:14px;}
+.action-badge.checkin{background:var(--green-light);color:var(--green-text);border:1px solid var(--green-border);}
+.action-badge.checkout{background:var(--blue-light);color:var(--blue-text);border:1px solid var(--blue-border);}
+
 .teacher-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-.teacher-btn{padding:10px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);cursor:pointer;text-align:left;transition:all 0.15s;}
+.teacher-btn{padding:10px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);cursor:pointer;text-align:left;transition:all 0.15s;position:relative;}
 .teacher-btn:hover:not(:disabled){border-color:var(--green);background:var(--green-light);color:var(--green-text);}
 .teacher-btn.selected{border-color:var(--green);background:var(--green-light);color:var(--green-text);font-weight:600;}
+.teacher-btn.checked-in{border-color:var(--blue-border);background:var(--blue-light);color:var(--blue-text);}
+.teacher-btn.checked-out{opacity:0.4;cursor:not-allowed;}
 .teacher-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.teacher-status{display:block;font-size:10px;margin-top:2px;opacity:0.8;}
 
-.submit-btn{width:100%;padding:12px;font-size:15px;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;}
+.submit-btn{width:100%;padding:12px;font-size:15px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:opacity 0.15s;}
+.submit-btn.checkin-btn{background:var(--green);color:#fff;}
+.submit-btn.checkout-btn{background:var(--blue);color:#fff;}
 .submit-btn:hover{opacity:0.9;}
 .submit-btn:disabled{opacity:0.4;cursor:not-allowed;}
 
 .err-box{background:var(--red-light);border:1px solid #FCA5A5;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:#991B1B;margin-top:12px;display:none;line-height:1.5;}
-.done-box{background:var(--green-light);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:14px 16px;font-size:14px;color:var(--green-text);margin-top:12px;display:none;line-height:1.6;text-align:center;}
-.done-box .big{font-size:28px;margin-bottom:6px;}
+.done-box{border-radius:var(--radius-sm);padding:16px;font-size:14px;margin-top:12px;display:none;line-height:1.7;text-align:center;}
+.done-box.checkin-done{background:var(--green-light);border:1px solid var(--green-border);color:var(--green-text);}
+.done-box.checkout-done{background:var(--blue-light);border:1px solid var(--blue-border);color:var(--blue-text);}
+.done-box .big{font-size:32px;margin-bottom:6px;}
 .saving-txt{font-size:12px;color:var(--text-muted);margin-top:8px;text-align:center;}
 
 .blocked-page{text-align:center;padding:2rem 1rem;}
@@ -51,32 +64,32 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.25r
 </head>
 <body>
 <nav>
-  <div class="nav-logo"><span>✓</span>Teacher Check-In</div>
+  <div class="nav-logo"><span>✓</span>Teacher Attendance</div>
+  <div class="nav-date" id="navDate"></div>
 </nav>
-
 <div class="main">
-  <!-- BLOCKED STATE -->
   <div class="card" id="blockedCard" style="display:none;">
     <div class="blocked-page">
       <div class="icon" id="blockedIcon">⛔</div>
       <h2 id="blockedTitle">Access Denied</h2>
-      <p id="blockedMsg">This link is not valid.</p>
+      <p id="blockedMsg"></p>
     </div>
   </div>
 
-  <!-- CHECK-IN FORM -->
   <div class="card" id="checkinCard" style="display:none;">
-    <div class="card-title">Mark Your Attendance</div>
-    <div class="card-sub" id="cardDate"></div>
+    <div class="card-title" id="cardTitle">Mark Attendance</div>
+    <div class="card-sub">Select your name below.</div>
 
     <div class="status-box" id="geoBox">
       <span class="dot orange" id="geoDot"></span>
       <span id="geoTxt">Verifying your location...</span>
     </div>
 
+    <div class="action-badge checkin" id="actionBadge">🟢 This will mark your CHECK-IN</div>
+
     <div class="teacher-grid" id="teacherGrid"></div>
 
-    <button class="submit-btn" id="submitBtn" onclick="submit()" disabled>Mark Attendance</button>
+    <button class="submit-btn checkin-btn" id="submitBtn" onclick="submitAction()" disabled>Check In</button>
     <div class="saving-txt" id="savingTxt"></div>
     <div class="err-box" id="errBox"></div>
     <div class="done-box" id="doneBox"></div>
@@ -85,20 +98,33 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.25r
 
 <script>
 const TEACHERS = ['Pranita','Laveena','Rishu Kumar','Ankit','Sai Adarsh','Mayu','Shruthi Lakshmi','Christene'];
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfFDGtu9vGwl_qXzRorbP_wcfXXysDF5KJ_IeBocTOJSxlSku355Hae49utOM5ItHhKg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzHVuy_bpwh37QNRZu7Folvl5xll7Ze7cjqGVOs3r9YteSmL3t_SM2YA-yae-DNYGx/exec';
 const GEO_RADIUS = 100;
+const OFFICE_LAT = null; // Set by URL param
+const OFFICE_LNG = null;
 
 let selectedTeacher = '';
 let teacherLat = null, teacherLng = null;
 let officeLat = null, officeLng = null;
-let tokenValid = false;
 let geoValid = false;
+let action = 'checkin'; // 'checkin' or 'checkout'
 let submitted = false;
 
-// ── PARSE URL PARAMS ──
+// Today's key for localStorage
+const today = new Date().toLocaleDateString('en-IN').replace(/\//g,'_');
+
+function getStorageKey(name, type) {
+  return `att_${type}_${name.replace(/\s/g,'_')}_${today}`;
+}
+
+function hasCheckedIn(name) { return !!localStorage.getItem(getStorageKey(name,'in')); }
+function hasCheckedOut(name) { return !!localStorage.getItem(getStorageKey(name,'out')); }
+
+// Nav date
+document.getElementById('navDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+// Parse URL params for office location
 const params = new URLSearchParams(window.location.search);
-const token = params.get('token');
-const expiry = parseInt(params.get('exp') || '0');
 officeLat = parseFloat(params.get('lat'));
 officeLng = parseFloat(params.get('lng'));
 
@@ -111,99 +137,101 @@ function showBlocked(icon, title, msg) {
 }
 
 function init() {
-  // Check token exists
-  if (!token || !expiry || !officeLat || !officeLng) {
-    showBlocked('⛔', 'Invalid QR Code', 'Please scan the QR code displayed in your classroom. Do not open this link directly.');
+  if (!officeLat || !officeLng || isNaN(officeLat) || isNaN(officeLng)) {
+    showBlocked('⛔','Invalid QR Code','Please scan the QR code on the office door. Do not open this link directly.');
     return;
   }
-
-  // Check token not expired
-  if (Date.now() > expiry) {
-    showBlocked('⏱', 'QR Code Expired', 'This QR code has expired. Please scan the latest QR code shown on the projector.');
-    return;
-  }
-
-  // Check already submitted today (device lock)
-  const submittedKey = 'submitted_' + new Date().toLocaleDateString('en-IN').replace(/\//g,'_');
-  if (sessionStorage.getItem(submittedKey)) {
-    showBlocked('🔒', 'Already Marked', 'You have already marked your attendance today. Each device can only submit once per day.');
-    return;
-  }
-
-  tokenValid = true;
   document.getElementById('checkinCard').style.display = 'block';
-  document.getElementById('cardDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   buildTeacherGrid();
   checkGeo();
 }
 
 function buildTeacherGrid() {
   const grid = document.getElementById('teacherGrid');
+  grid.innerHTML = '';
   TEACHERS.forEach(name => {
     const btn = document.createElement('button');
-    btn.className = 'teacher-btn';
-    btn.textContent = name;
-    btn.disabled = true;
-    btn.onclick = () => selectTeacher(name);
+    const ci = hasCheckedIn(name);
+    const co = hasCheckedOut(name);
+    btn.className = 'teacher-btn' + (co ? ' checked-out' : ci ? ' checked-in' : '');
+    btn.disabled = co || !geoValid;
+    const statusTxt = co ? '✓ Checked in & out' : ci ? '✓ Checked in' : '';
+    btn.innerHTML = `${name}<span class="teacher-status">${statusTxt}</span>`;
+    btn.onclick = () => selectTeacher(name, btn);
     grid.appendChild(btn);
   });
 }
 
-function selectTeacher(name) {
+function selectTeacher(name, btn) {
   if (submitted) return;
+  if (hasCheckedOut(name)) return;
   selectedTeacher = name;
-  document.querySelectorAll('.teacher-btn').forEach(b => b.classList.toggle('selected', b.textContent === name));
-  updateSubmitBtn();
+  action = hasCheckedIn(name) ? 'checkout' : 'checkin';
+  document.querySelectorAll('.teacher-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  updateUI();
 }
 
-function updateSubmitBtn() {
-  document.getElementById('submitBtn').disabled = !(selectedTeacher && geoValid && tokenValid && !submitted);
+function updateUI() {
+  const submitBtn = document.getElementById('submitBtn');
+  const badge = document.getElementById('actionBadge');
+  if (action === 'checkin') {
+    badge.className = 'action-badge checkin';
+    badge.textContent = '🟢 This will mark your CHECK-IN time';
+    submitBtn.className = 'submit-btn checkin-btn';
+    submitBtn.textContent = 'Check In';
+  } else {
+    badge.className = 'action-badge checkout';
+    badge.textContent = '🔵 This will mark your CHECK-OUT time';
+    submitBtn.className = 'submit-btn checkout-btn';
+    submitBtn.textContent = 'Check Out';
+  }
+  submitBtn.disabled = !(selectedTeacher && geoValid && !submitted);
 }
 
 function getDistance(lat1,lon1,lat2,lon2) {
-  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
 function checkGeo() {
-  const dot = document.getElementById('geoDot');
-  const txt = document.getElementById('geoTxt');
-
   if (!navigator.geolocation) {
-    dot.className = 'dot red'; txt.textContent = 'Geolocation not supported on this device.'; return;
+    document.getElementById('geoDot').className='dot red';
+    document.getElementById('geoTxt').textContent='Geolocation not supported on this device.';
+    return;
   }
-
   navigator.geolocation.getCurrentPosition(pos => {
     teacherLat = pos.coords.latitude;
     teacherLng = pos.coords.longitude;
-    const dist = Math.round(getDistance(teacherLat, teacherLng, officeLat, officeLng));
-
+    const dist = Math.round(getDistance(teacherLat,teacherLng,officeLat,officeLng));
     if (dist <= GEO_RADIUS) {
-      dot.className = 'dot green';
-      txt.textContent = `✓ You are ${dist}m from office — within range`;
+      document.getElementById('geoDot').className='dot green';
+      document.getElementById('geoTxt').textContent=`✓ You are ${dist}m from office — within range`;
       geoValid = true;
-      document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = false);
+      buildTeacherGrid();
     } else {
-      dot.className = 'dot red';
-      txt.textContent = `✗ You are ${dist}m away — must be within 100m of the office`;
+      document.getElementById('geoDot').className='dot red';
+      document.getElementById('geoTxt').textContent=`✗ You are ${dist}m away — must be within 100m`;
       geoValid = false;
     }
-    updateSubmitBtn();
+    updateUI();
   }, err => {
-    dot.className = 'dot red';
-    txt.textContent = 'Location access denied. Please enable GPS and reload.';
+    document.getElementById('geoDot').className='dot red';
+    document.getElementById('geoTxt').textContent='Location access denied. Please enable GPS and reload.';
     geoValid = false;
-    updateSubmitBtn();
-  }, { enableHighAccuracy: true, timeout: 10000 });
+    updateUI();
+  }, {enableHighAccuracy:true,timeout:10000});
 }
 
-async function submit() {
-  if (!selectedTeacher || !geoValid || !tokenValid || submitted) return;
+async function submitAction() {
+  if (!selectedTeacher || !geoValid || submitted) return;
 
-  // Re-check token expiry at submit time
-  if (Date.now() > expiry) {
-    showBlocked('⏱', 'QR Code Expired', 'The QR code expired while you were filling the form. Please scan the new QR code shown on the projector.');
+  // Re-verify geo at submit time
+  const dist = Math.round(getDistance(teacherLat,teacherLng,officeLat,officeLng));
+  if (dist > GEO_RADIUS) {
+    document.getElementById('errBox').style.display='block';
+    document.getElementById('errBox').textContent=`You moved too far (${dist}m). Must be within 100m.`;
     return;
   }
 
@@ -212,34 +240,48 @@ async function submit() {
   document.querySelectorAll('.teacher-btn').forEach(b => b.disabled = true);
 
   const now = new Date();
-  const dist = Math.round(getDistance(teacherLat, teacherLng, officeLat, officeLng));
+  const timeStr = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const dateStr = now.toLocaleDateString('en-IN');
+
   const record = {
     type: 'teacher',
+    action: action,
     name: selectedTeacher,
-    date: now.toLocaleDateString('en-IN'),
-    time: now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
-    distance: dist + 'm',
-    token: token.slice(0, 8)
+    date: dateStr,
+    time: timeStr,
+    distance: dist + 'm'
   };
 
-  // Lock device for today
-  const submittedKey = 'submitted_' + now.toLocaleDateString('en-IN').replace(/\//g,'_');
-  sessionStorage.setItem(submittedKey, '1');
+  // Save to localStorage
+  localStorage.setItem(getStorageKey(selectedTeacher, action==='checkin'?'in':'out'), timeStr);
 
-  document.getElementById('doneBox').style.display = 'block';
-  document.getElementById('doneBox').innerHTML = `<div class="big">✓</div><strong>Attendance marked!</strong><br>${selectedTeacher}<br><span style="font-size:12px;opacity:0.8;">${record.date} at ${record.time}</span>`;
+  // Show confirmation
+  const doneBox = document.getElementById('doneBox');
+  doneBox.style.display = 'block';
+  if (action === 'checkin') {
+    doneBox.className = 'done-box checkin-done';
+    doneBox.innerHTML = `<div class="big">✅</div><strong>Check-In Recorded!</strong><br>${selectedTeacher}<br><span style="font-size:12px">📅 ${dateStr} &nbsp;🕐 ${timeStr}</span>`;
+  } else {
+    doneBox.className = 'done-box checkout-done';
+    const inTime = localStorage.getItem(getStorageKey(selectedTeacher,'in')) || '—';
+    doneBox.innerHTML = `<div class="big">🔵</div><strong>Check-Out Recorded!</strong><br>${selectedTeacher}<br><span style="font-size:12px">📅 ${dateStr}<br>🟢 In: ${inTime} &nbsp; 🔵 Out: ${timeStr}</span>`;
+  }
 
+  // Save to Sheets
   const saving = document.getElementById('savingTxt');
   saving.textContent = 'Saving to Google Sheets...';
   try {
     const formData = new FormData();
     formData.append('data', JSON.stringify(record));
-    await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: formData });
-    saving.textContent = '✓ Saved successfully';
-    setTimeout(() => { saving.textContent = ''; }, 3000);
+    await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:formData});
+    saving.textContent = '✓ Saved to Google Sheets';
+    setTimeout(()=>{saving.textContent='';},3000);
   } catch(e) {
     saving.textContent = '⚠ Could not reach Sheets — please inform admin.';
   }
+
+  // Refresh grid to show updated status
+  setTimeout(()=>{ buildTeacherGrid(); },500);
 }
 
 init();
