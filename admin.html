@@ -283,7 +283,7 @@ function renderLog() {
 
 function openPrint() {
   document.getElementById('printPage').style.display = 'flex';
-  window.print();
+  setTimeout(() => { window.print(); }, 500);
 }
 
 function closePrint() {
