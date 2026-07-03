@@ -64,9 +64,29 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
 .refresh-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);text-align:center;}
 
 @media print {
-  nav, .card:not(#qrPrintCard), .log-section, .page-title, .page-sub { display: none !important; }
-  #qrPrintCard { border: none !important; box-shadow: none !important; }
+  * { display: none !important; }
+  #printPage { display: flex !important; }
 }
+#printPage {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+#printPage .print-logo { font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+#printPage .print-sub { font-size: 13px; color: #6b6b68; margin-bottom: 24px; }
+#printPage .print-qr { padding: 20px; background: #fff; border: 2px solid #e0dfd8; border-radius: 16px; margin-bottom: 20px; }
+#printPage .print-hint { font-size: 14px; color: #3B6D11; font-weight: 500; margin-bottom: 4px; }
+#printPage .print-hint2 { font-size: 12px; color: #6b6b68; }
+#printPage .close-print { margin-top: 28px; padding: 8px 20px; font-size: 13px; border: 1px solid #e0dfd8; border-radius: 8px; background: #f5f5f3; cursor: pointer; }
+@media print { #printPage .close-print { display: none !important; } }
 </style>
 </head>
 <body>
@@ -125,7 +145,7 @@ nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5re
           🟢 <strong>1st scan</strong> = Check-In time<br>
           🔵 <strong>2nd scan</strong> = Check-Out time
         </div>
-        <button class="print-btn" onclick="window.print()">🖨 Print QR Code</button>
+        <button class="print-btn" onclick="openPrint()">🖨 Print QR Code</button>
       </div>
 
       <div class="log-section">
@@ -184,11 +204,22 @@ function generateQR() {
   // Build permanent URL with office location baked in
   const url = `${CHECKIN_URL}?lat=${officeLocation.lat}&lng=${officeLocation.lng}`;
 
+  // Main QR
   const container = document.getElementById('qrCanvas');
   container.innerHTML = '';
   new QRCode(container, {
     text: url,
     width: 200, height: 200,
+    colorDark: '#1a1a1a', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  // Print QR (larger)
+  const printContainer = document.getElementById('printQrCanvas');
+  printContainer.innerHTML = '';
+  new QRCode(printContainer, {
+    text: url,
+    width: 300, height: 300,
     colorDark: '#1a1a1a', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.M
   });
@@ -250,6 +281,15 @@ function renderLog() {
   document.getElementById('absentChips').innerHTML = absent.map(n=>`<span class="absent-chip">${n}</span>`).join('');
 }
 
+function openPrint() {
+  document.getElementById('printPage').style.display = 'flex';
+  window.print();
+}
+
+function closePrint() {
+  document.getElementById('printPage').style.display = 'none';
+}
+
 function exportCSV() {
   if (!allRecords.length) { alert('No records to export.'); return; }
   const rows = [['#','Name','Action','Date','Time','Distance'],
@@ -261,5 +301,14 @@ function exportCSV() {
   a.click();
 }
 </script>
+<!-- PRINT PAGE -->
+<div id="printPage">
+  <div class="print-logo">🏢 Hana Global</div>
+  <div class="print-sub">Teacher Attendance System</div>
+  <div class="print-qr" id="printQrCanvas"></div>
+  <div class="print-hint">📱 Scan to mark your attendance</div>
+  <div class="print-hint2">1st scan = Check-In &nbsp;|&nbsp; 2nd scan = Check-Out</div>
+  <button class="close-print" onclick="closePrint()">✕ Close</button>
+</div>
 </body>
 </html>
